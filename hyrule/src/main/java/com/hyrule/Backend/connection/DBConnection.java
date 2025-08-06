@@ -34,4 +34,22 @@ public class DBConnection {
         }
 
     }
+
+    public void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+                System.out.println("Conexión cerrada exitosamente.");
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar la conexión: " + e.getMessage());
+            }
+        }
+    }
+
+    public Connection getConnection() {
+        if (connection == null) {
+            connect();
+        }
+        return connection;
+    }
 }
