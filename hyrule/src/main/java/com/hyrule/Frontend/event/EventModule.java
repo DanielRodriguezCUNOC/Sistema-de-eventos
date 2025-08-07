@@ -1,19 +1,28 @@
 package com.hyrule.Frontend.event;
 
-import javax.swing.JFrame;
+import java.awt.BorderLayout;
 
-public class EventModule extends JFrame {
-    
+import javax.swing.JButton;
+import javax.swing.JInternalFrame;
+
+import com.hyrule.Frontend.AdminModule;
+
+public class EventModule extends JInternalFrame {
+
     public EventModule() {
-        setTitle("Event Module");
+        this(null);
+    }
+
+    public EventModule(AdminModule adminView) {
+        super("Eventos", true, true, true, true);
         setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        JButton btnIrARegistro = new JButton("Ir a Registro de Eventos");
+        btnIrARegistro.addActionListener(e -> {
+            adminView.mostrarEventRegisterModule();
+        });
+        add(btnIrARegistro, BorderLayout.CENTER);
     }
-    
-    public static void main(String[] args) {
-        EventModule eventModule = new EventModule();
-        eventModule.setVisible(true);
-    }
-    
+
 }

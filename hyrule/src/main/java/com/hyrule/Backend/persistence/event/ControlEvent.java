@@ -30,7 +30,7 @@ public class ControlEvent extends Control<EventModel> {
 
             return (rowsAffected >0) ? entity : null;
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
         return null; // Placeholder return
     }
