@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
-import com.hyrule.Backend.persistence.event.EventRegisterData;
+import com.hyrule.Backend.handler.EventRegisterHandler;
 import com.hyrule.Frontend.AdminModule;
 import com.hyrule.Validations.ValidateEventRegister;
 
@@ -195,16 +195,18 @@ public class EventRegisterForm extends JInternalFrame {
         String ubicacion = txtUbicacion.getText().trim();
         int cupoMax = (Integer) spinnerCupoMax.getValue();
 
+        // * Validar los campos del formulario */
         ValidateEventRegister validator = new ValidateEventRegister(codigo, fechaStr, tipoStr, titulo, ubicacion,
                 cupoMax);
 
         if (validator.isValid()) {
-            EventRegisterData eventData = new EventRegisterData(codigo, fechaStr, tipoStr, titulo, ubicacion, cupoMax);
-            boolean success = eventData.registrarEvento();
-            if (success) {
+
+            // * Si los campos son válidos, procesar el registro del evento */
+            EventRegisterHandler eventHandler = new EventRegisterHandler();
+            boolean exito = eventHandler.registerEventFromForm(codigo, fechaStr, tipoStr, titulo, ubicacion, cupoMax);
+            if (exito) {
                 JOptionPane.showMessageDialog(this, "Evento registrado exitosamente.", "Éxito",
                         JOptionPane.INFORMATION_MESSAGE);
-                dispose(); // Cierra el formulario
             } else {
                 JOptionPane.showMessageDialog(this, "Error al registrar el evento.", "Error",
                         JOptionPane.ERROR_MESSAGE);
