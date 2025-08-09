@@ -25,6 +25,7 @@ public class EventRegisterHandler implements RegisterHandler {
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
+            // *Validamos la linea con la expresion regular */
             Matcher m = PATRON.matcher(linea.trim());
             if (!m.matches())
                 return false;

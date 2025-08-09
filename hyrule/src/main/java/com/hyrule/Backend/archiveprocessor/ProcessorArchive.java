@@ -54,7 +54,10 @@ public class ProcessorArchive {
     }
 
     private String extraerComando(String linea) {
+        // *Hallamos la posicion del primer parentesis */
         int idx = linea.indexOf("(");
+        // *Extraemos la subcadena desde el inicio hasta el parentesis*/
+        // *caso contrario devolvemos la linea completa */
         return (idx > 0) ? linea.substring(0, idx) : linea;
     }
 }

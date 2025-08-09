@@ -71,7 +71,7 @@ public class EventRegisterForm extends JInternalFrame {
 
         JLabel lblFecha = new JLabel("Fecha Evento:");
         lblFecha.setFont(labelFont);
-        txtFechaEvento = new JTextField("YYYY-MM-DD");
+        txtFechaEvento = new JTextField("dd/MM/yyyy");
         txtFechaEvento.setFont(fieldFont);
         txtFechaEvento.setForeground(Color.GRAY);
 

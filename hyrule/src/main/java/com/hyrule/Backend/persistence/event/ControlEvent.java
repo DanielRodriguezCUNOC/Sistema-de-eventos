@@ -9,16 +9,15 @@ import com.hyrule.Backend.model.event.EventModel;
 import com.hyrule.Backend.persistence.Control;
 
 public class ControlEvent extends Control<EventModel> {
-    
+
     @Override
     public EventModel insert(EventModel entity) {
-        //*Generamos la query*/
-        String query = "INSERT INTO eventos (codigo, fecha, tipo, titulo, ubicacion, cupo_max) VALUES (?, ?, ?, ?, ?, ?)";
+        // *Generamos la query*/
+        String query = "INSERT INTO evento (codigo_evento, fecha_evento, tipo_evento, titulo_evento, ubicacion_evento, cupo_max_participantes) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try(
-            Connection conn = new DBConnection().getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(query)
-        ) {
+        try (
+                Connection conn = new DBConnection().getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, entity.getCodigoEvento());
             pstmt.setDate(2, java.sql.Date.valueOf(entity.getFechaEvento()));
             pstmt.setString(3, entity.getTipoEvento().name());
@@ -28,7 +27,7 @@ public class ControlEvent extends Control<EventModel> {
 
             int rowsAffected = pstmt.executeUpdate();
 
-            return (rowsAffected >0) ? entity : null;
+            return (rowsAffected > 0) ? entity : null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,5 +55,5 @@ public class ControlEvent extends Control<EventModel> {
         // Implementation for finding all events
         return null; // Placeholder return
     }
-    
+
 }
