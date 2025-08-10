@@ -5,12 +5,13 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.hyrule.Frontend.event.EventModule;
 import com.hyrule.Frontend.event.EventRegisterForm;
 
 public class AdminModule extends JFrame {
 
     private JDesktopPane desktopPane;
+    private boolean archivoLeido = false;
+    private JPanel panelLoadArchive;
 
     public AdminModule() {
         setTitle("Módulo Administrador");
@@ -26,37 +27,88 @@ public class AdminModule extends JFrame {
             }
         };
 
-        setContentPane(desktopPane);
-
-        setJMenuBar(crearMenuBar());
+        archivoLeido();
 
         setVisible(true);
+    }
+
+    // *Verificamos si el archivo ya fue leído */
+    private void archivoLeido() {
+        panelLoadArchive = new JPanel();
+        panelLoadArchive.setLayout(new BorderLayout());
+        panelLoadArchive.setBackground(new Color(240, 242, 245));
+        pedirArchivo();
+        archivoLeido = true;
+        desktopPane.add(panelLoadArchive);
+
+        if (archivoLeido) {
+            setContentPane(desktopPane);
+
+            setJMenuBar(crearMenuBar());
+        } else {
+
+            System.out.println("Archivo no leído.");
+        }
     }
 
     private JMenu crearMenu(String titulo) {
         JMenu menu = new JMenu(titulo);
         menu.setFont(new Font("SansSerif", Font.BOLD, 15));
-        menu.setForeground(Color.WHITE);
-        menu.setOpaque(false);
-        menu.setBorder(null);
+        menu.setBackground(new Color(33, 141, 230));
+        menu.setBorder(new EmptyBorder(5, 20, 5, 20));
+        menu.setForeground(new Color(255, 255, 255));
+        menu.setOpaque(true);
+
+        // Efectos hover y evitar que el menú mantenga el estilo de selección
+        menu.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                menu.setBackground(new Color(33, 141, 230));
+                menu.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                menu.repaint();
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                menu.setBackground(new Color(33, 141, 230));
+                menu.setSelected(false);
+                menu.repaint();
+            }
+        });
+
         return menu;
     }
 
     private JMenuItem crearMenuItem(String texto) {
         JMenuItem item = new JMenuItem(texto);
         item.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        item.setBackground(Color.WHITE);
-        item.setBorder(new EmptyBorder(5, 20, 5, 20));
-        item.setForeground(new Color(33, 37, 41));
+        item.setBackground(new Color(33, 141, 230));
+        item.setBorder(new EmptyBorder(8, 20, 8, 20));
+        item.setForeground(new Color(255, 255, 255));
+        item.setOpaque(true);
 
-        // *Creamos un efecto hover al pasar el mouse */
+        // Deshabilitar el foco visual por defecto
+        item.setFocusPainted(false);
+        item.setBorderPainted(false);
+
+        // Efectos hover mejorados
         item.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                item.setBackground(new Color(220, 220, 220));
+                item.setBackground(new Color(33, 141, 230));
+                item.setForeground(Color.WHITE);
+                item.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                item.setSelected(false);
+                item.repaint();
             }
 
+            @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                item.setBackground(Color.WHITE);
+                item.setBackground(new Color(33, 141, 230));
+                item.setForeground(Color.WHITE);
+                item.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                item.setSelected(false);
+                item.repaint();
             }
         });
 
@@ -77,18 +129,15 @@ public class AdminModule extends JFrame {
         itemRegistrarEvento.addActionListener(e -> {
             cerrarVentanas();
             mostrarEventRegisterModule();
+
+            // * Quitar la selección del menú después de hacer clic */
+            menuEventos.setSelected(false);
+            menuBar.repaint();
         });
         menuEventos.add(itemRegistrarEvento);
 
         menuBar.add(menuEventos);
         return menuBar;
-    }
-
-    public void mostrarEventModule() {
-        EventModule eventModule = new EventModule(this);
-        desktopPane.add(eventModule);
-        centrarInternalFrame(eventModule);
-        eventModule.setVisible(true);
     }
 
     public void mostrarEventRegisterModule() {
@@ -109,6 +158,19 @@ public class AdminModule extends JFrame {
         Dimension jInternalFrameSize = frame.getSize();
         frame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
                 (desktopSize.height - jInternalFrameSize.height) / 2);
+    }
+
+    // *Metodo para pedir al usuario que suba un archivo */
+    public void pedirArchivo() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Seleccionar archivo");
+        int userSelection = fileChooser.showOpenDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            // Aquí puedes manejar el archivo seleccionado
+            System.out.println("Archivo seleccionado: " + fileChooser.getSelectedFile().getAbsolutePath());
+        } else {
+            System.out.println("No se seleccionó ningún archivo.");
+        }
     }
 
 }

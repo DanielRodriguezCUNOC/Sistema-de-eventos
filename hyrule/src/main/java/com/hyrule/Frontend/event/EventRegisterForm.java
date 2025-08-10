@@ -4,9 +4,9 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
+import com.hyrule.Backend.Validations.ValidateEventRegister;
 import com.hyrule.Backend.handler.EventRegisterHandler;
 import com.hyrule.Frontend.AdminModule;
-import com.hyrule.Validations.ValidateEventRegister;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -212,7 +212,7 @@ public class EventRegisterForm extends JInternalFrame {
                         JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos correctamente.", "Error",
+            JOptionPane.showMessageDialog(this, "Error de validación", "Error",
                     JOptionPane.ERROR_MESSAGE);
 
         }
