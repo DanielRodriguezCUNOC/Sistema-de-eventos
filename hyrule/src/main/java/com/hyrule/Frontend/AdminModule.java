@@ -1,7 +1,11 @@
 package com.hyrule.Frontend;
 
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.InputStream;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -10,12 +14,14 @@ import com.hyrule.Frontend.event.EventRegisterForm;
 public class AdminModule extends JFrame {
 
     private JDesktopPane desktopPane;
-    private boolean archivoLeido = false;
-    private JPanel panelLoadArchive;
+    private boolean subirArchivo = false;
+    private JPanel panelFondo;
+    private JPanel panelInicio;
 
     public AdminModule() {
         setTitle("Módulo Administrador");
-        setSize(600, 500);
+        setSize(1000, 740);
+        setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -27,28 +33,70 @@ public class AdminModule extends JFrame {
             }
         };
 
-        archivoLeido();
+        setContentPane(desktopPane);
+        subirArchivo();
 
         setVisible(true);
     }
 
-    // *Verificamos si el archivo ya fue leído */
-    private void archivoLeido() {
-        panelLoadArchive = new JPanel();
-        panelLoadArchive.setLayout(new BorderLayout());
-        panelLoadArchive.setBackground(new Color(240, 242, 245));
-        pedirArchivo();
-        archivoLeido = true;
-        desktopPane.add(panelLoadArchive);
+    private void subirArchivo() {
+        panelInicio = new JPanel();
+        panelInicio.setLayout(new GridBagLayout());
+        panelInicio.setBackground(new Color(245, 247, 250));
+        panelInicio.setBounds(0, 0, 1000, 740);
 
-        if (archivoLeido) {
-            setContentPane(desktopPane);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+        gbc.insets = new Insets(15, 15, 15, 15);
+        gbc.anchor = GridBagConstraints.CENTER;
 
-            setJMenuBar(crearMenuBar());
-        } else {
+        JLabel labelTitulo = new JLabel("Bienvenido al Módulo Administrador");
+        labelTitulo.setFont(new Font("SansSerif", Font.BOLD, 24));
+        labelTitulo.setForeground(new Color(40, 40, 40));
+        labelTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
-            System.out.println("Archivo no leído.");
-        }
+        JLabel labelSubtitulo = new JLabel("Por favor, sube un archivo para continuar.");
+        labelSubtitulo.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        labelSubtitulo.setForeground(new Color(90, 90, 90));
+        labelSubtitulo.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JButton buttonCargarArchivo = new JButton("📂 Cargar Archivo");
+        buttonCargarArchivo.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        buttonCargarArchivo.setBackground(new Color(33, 141, 230));
+        buttonCargarArchivo.setForeground(Color.WHITE);
+        buttonCargarArchivo.setFocusPainted(false);
+        buttonCargarArchivo.setBorder(new EmptyBorder(12, 25, 12, 25));
+        buttonCargarArchivo.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        buttonCargarArchivo.addActionListener(e -> {
+            desktopPane.remove(panelInicio);
+            pedirArchivo();
+            subirArchivo = true;
+            if (subirArchivo) {
+                panelFondo();
+                desktopPane.revalidate();
+                desktopPane.repaint();
+                setJMenuBar(crearMenuBar());
+            } else {
+                System.out.println("Archivo no leído.");
+            }
+        });
+
+        JPanel panelTextos = new JPanel();
+        panelTextos.setLayout(new BoxLayout(panelTextos, BoxLayout.Y_AXIS));
+        panelTextos.setBackground(new Color(245, 247, 250));
+        panelTextos.add(labelTitulo);
+        panelTextos.add(Box.createVerticalStrut(10));
+        panelTextos.add(labelSubtitulo);
+
+        // *Añadimos elementos al panel principal */
+        panelInicio.add(panelTextos, gbc);
+        panelInicio.add(buttonCargarArchivo, gbc);
+
+        desktopPane.add(panelInicio);
+        desktopPane.revalidate();
+        desktopPane.repaint();
     }
 
     private JMenu crearMenu(String titulo) {
@@ -59,7 +107,6 @@ public class AdminModule extends JFrame {
         menu.setForeground(new Color(255, 255, 255));
         menu.setOpaque(true);
 
-        // Efectos hover y evitar que el menú mantenga el estilo de selección
         menu.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -170,6 +217,54 @@ public class AdminModule extends JFrame {
             System.out.println("Archivo seleccionado: " + fileChooser.getSelectedFile().getAbsolutePath());
         } else {
             System.out.println("No se seleccionó ningún archivo.");
+        }
+    }
+
+    private void panelFondo() {
+        InputStream imgStream = getClass().getResourceAsStream("/com/hyrule/resources/images/fondo.png");
+        panelFondo = new JPanel(new BorderLayout());
+        panelFondo.setBackground(new Color(245, 247, 250));
+
+        if (imgStream == null) {
+            System.err.println("No se pudo cargar la imagen de fondo.");
+            return;
+
+        }
+        try {
+            Image originalImage = ImageIO.read(imgStream);
+            panelFondo.setOpaque(false);
+            JLabel lblImage = new JLabel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    int altura = desktopPane.getHeight();
+                    int ancho = desktopPane.getWidth();
+                    double imgRatio = (double) originalImage.getWidth(null) / originalImage.getHeight(null);
+                    int nuevaAnchura = ancho;
+                    int nuevaAltura = (int) (nuevaAnchura / imgRatio);
+
+                    if (nuevaAltura > altura) {
+                        nuevaAltura = altura;
+                        nuevaAnchura = (int) (nuevaAltura * imgRatio);
+
+                    }
+                    int x = (ancho - nuevaAnchura) / 2;
+
+                    g.drawImage(originalImage, x, 0, nuevaAnchura, nuevaAltura, this);
+                }
+            };
+            panelFondo.add(lblImage, BorderLayout.CENTER);
+            panelFondo.setBounds(0, 0, desktopPane.getWidth(), desktopPane.getHeight());
+            desktopPane.add(panelFondo);
+
+            desktopPane.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    panelFondo.setSize(desktopPane.getSize());
+                    lblImage.repaint();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
