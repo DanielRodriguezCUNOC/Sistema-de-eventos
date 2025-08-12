@@ -26,12 +26,11 @@ public class UploadArchiveFrame extends JInternalFrame {
     public UploadArchiveFrame(AdminModule adminView) {
         super("", true, true, true, true);
         this.adminView = adminView;
+
+        setLayout(new BorderLayout());
         setSize(1000, 740);
-        setLocation(200, 100);
-        setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
         initComponents();
         modificarVentana();
-        setVisible(true);
     }
 
     private void initComponents() {
@@ -46,15 +45,10 @@ public class UploadArchiveFrame extends JInternalFrame {
         gbc.insets = new Insets(15, 15, 15, 15);
         gbc.anchor = GridBagConstraints.CENTER;
 
-        JLabel labelTitulo = new JLabel("Bienvenido al Módulo Administrador");
+        JLabel labelTitulo = new JLabel("Suba un Archivo para Procesar");
         labelTitulo.setFont(new Font("SansSerif", Font.BOLD, 24));
         labelTitulo.setForeground(new Color(40, 40, 40));
         labelTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JLabel labelSubtitulo = new JLabel("Por favor, sube un archivo para continuar.");
-        labelSubtitulo.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        labelSubtitulo.setForeground(new Color(90, 90, 90));
-        labelSubtitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
         JButton buttonCargarArchivo = new JButton("📂 Cargar Archivo");
         buttonCargarArchivo.setFont(new Font("SansSerif", Font.PLAIN, 16));
@@ -73,11 +67,10 @@ public class UploadArchiveFrame extends JInternalFrame {
         panelTextos.setBackground(new Color(245, 247, 250));
         panelTextos.add(labelTitulo);
         panelTextos.add(Box.createVerticalStrut(10));
-        panelTextos.add(labelSubtitulo);
 
         JButton btnRegresar = new JButton("⬅️ Regresar");
         btnRegresar.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        btnRegresar.setBackground(new Color(200, 200, 200));
+        btnRegresar.setBackground(new Color(252, 141, 18));
         btnRegresar.setForeground(Color.BLACK);
         btnRegresar.setFocusPainted(false);
         btnRegresar.setBorder(new EmptyBorder(12, 25, 12, 25));
@@ -89,6 +82,7 @@ public class UploadArchiveFrame extends JInternalFrame {
         // *Añadimos elementos al panel principal */
         panel.add(panelTextos, gbc);
         panel.add(buttonCargarArchivo, gbc);
+        panel.add(btnRegresar, gbc);
 
         add(panel);
     }
