@@ -130,6 +130,7 @@ public class AdminModule extends JFrame {
         menuSubirArchivo.add(itemSubirArchivo);
 
         menuBar.add(menuEventos);
+        menuBar.add(Box.createHorizontalStrut(10));
         menuBar.add(menuSubirArchivo);
         return menuBar;
     }
