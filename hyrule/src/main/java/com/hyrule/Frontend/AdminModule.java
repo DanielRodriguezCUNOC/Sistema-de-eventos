@@ -39,6 +39,21 @@ public class AdminModule extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * The function `crearMenu` creates a customized JMenu component with specific
+     * styling and mouse
+     * hover effects.
+     * 
+     * @param titulo The parameter "titulo" in the method "crearMenu" represents the
+     *               title of the menu
+     *               that will be created. This title will be displayed at the top
+     *               of the menu when it is rendered in
+     *               a graphical user interface.
+     * @return The method `crearMenu` is returning a `JMenu` object that has been
+     *         customized with a
+     *         specific font, background color, border, foreground color, and mouse
+     *         listener for hover effects.
+     */
     private JMenu crearMenu(String titulo) {
         JMenu menu = new JMenu(titulo);
         menu.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -66,6 +81,20 @@ public class AdminModule extends JFrame {
         return menu;
     }
 
+    /**
+     * The function `crearMenuItem` creates a customized JMenuItem with specific
+     * styling and hover effects
+     * in Java.
+     * 
+     * @param texto The `texto` parameter in the `crearMenuItem` method is a
+     *              `String` that represents the
+     *              text that will be displayed on the `JMenuItem` created by this
+     *              method. It is essentially the label
+     *              or text content of the menu item.
+     * @return The method `crearMenuItem` is returning a `JMenuItem` object with
+     *         customized properties such
+     *         as font, background color, border, and hover effects.
+     */
     private JMenuItem crearMenuItem(String texto) {
         JMenuItem item = new JMenuItem(texto);
         item.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -100,6 +129,18 @@ public class AdminModule extends JFrame {
         return item;
     }
 
+    /**
+     * The function `crearMenuBar` creates a custom menu bar with a specific
+     * background color and border,
+     * including a "Eventos" menu with an item to register events that triggers a
+     * specific action when
+     * clicked.
+     * 
+     * @return The method `crearMenuBar()` is returning a `JMenuBar` object that has
+     *         been customized with a
+     *         background color, border, and a menu item for registering events
+     *         under the "Eventos" menu.
+     */
     private JMenuBar crearMenuBar() {
         // *Creamos la barra de menú */
         JMenuBar menuBar = new JMenuBar();
@@ -135,6 +176,11 @@ public class AdminModule extends JFrame {
         return menuBar;
     }
 
+    /**
+     * The function `mostrarEventRegisterModule` creates and displays an
+     * `EventRegisterForm` internal
+     * frame on a desktop pane.
+     */
     public void mostrarEventRegisterModule() {
         EventRegisterForm registerModule = new EventRegisterForm(this);
         desktopPane.add(registerModule);
