@@ -29,7 +29,7 @@ public class EventRegisterForm extends JInternalFrame {
         this.adminView = adminView;
 
         setLayout(new BorderLayout());
-        setSize(600, 450);
+        setSize(1000, 740);
         initComponents();
 
         modificarVentana();
