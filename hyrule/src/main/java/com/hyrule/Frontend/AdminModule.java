@@ -10,13 +10,12 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.hyrule.Frontend.event.EventRegisterForm;
+import com.hyrule.Frontend.loadarchive.UploadArchiveFrame;
 
 public class AdminModule extends JFrame {
 
     private JDesktopPane desktopPane;
-    private boolean subirArchivo = false;
     private JPanel panelFondo;
-    private JPanel panelInicio;
 
     public AdminModule() {
         setTitle("Módulo Administrador");
@@ -34,69 +33,10 @@ public class AdminModule extends JFrame {
         };
 
         setContentPane(desktopPane);
-        subirArchivo();
+        setJMenuBar(crearMenuBar());
+        panelFondo();
 
         setVisible(true);
-    }
-
-    private void subirArchivo() {
-        panelInicio = new JPanel();
-        panelInicio.setLayout(new GridBagLayout());
-        panelInicio.setBackground(new Color(245, 247, 250));
-        panelInicio.setBounds(0, 0, 1000, 740);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = GridBagConstraints.RELATIVE;
-        gbc.insets = new Insets(15, 15, 15, 15);
-        gbc.anchor = GridBagConstraints.CENTER;
-
-        JLabel labelTitulo = new JLabel("Bienvenido al Módulo Administrador");
-        labelTitulo.setFont(new Font("SansSerif", Font.BOLD, 24));
-        labelTitulo.setForeground(new Color(40, 40, 40));
-        labelTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JLabel labelSubtitulo = new JLabel("Por favor, sube un archivo para continuar.");
-        labelSubtitulo.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        labelSubtitulo.setForeground(new Color(90, 90, 90));
-        labelSubtitulo.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JButton buttonCargarArchivo = new JButton("📂 Cargar Archivo");
-        buttonCargarArchivo.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        buttonCargarArchivo.setBackground(new Color(33, 141, 230));
-        buttonCargarArchivo.setForeground(Color.WHITE);
-        buttonCargarArchivo.setFocusPainted(false);
-        buttonCargarArchivo.setBorder(new EmptyBorder(12, 25, 12, 25));
-        buttonCargarArchivo.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        buttonCargarArchivo.addActionListener(e -> {
-            desktopPane.remove(panelInicio);
-            pedirArchivo();
-            subirArchivo = true;
-            if (subirArchivo) {
-                panelFondo();
-                desktopPane.revalidate();
-                desktopPane.repaint();
-                setJMenuBar(crearMenuBar());
-            } else {
-                System.out.println("Archivo no leído.");
-            }
-        });
-
-        JPanel panelTextos = new JPanel();
-        panelTextos.setLayout(new BoxLayout(panelTextos, BoxLayout.Y_AXIS));
-        panelTextos.setBackground(new Color(245, 247, 250));
-        panelTextos.add(labelTitulo);
-        panelTextos.add(Box.createVerticalStrut(10));
-        panelTextos.add(labelSubtitulo);
-
-        // *Añadimos elementos al panel principal */
-        panelInicio.add(panelTextos, gbc);
-        panelInicio.add(buttonCargarArchivo, gbc);
-
-        desktopPane.add(panelInicio);
-        desktopPane.revalidate();
-        desktopPane.repaint();
     }
 
     private JMenu crearMenu(String titulo) {
@@ -134,11 +74,9 @@ public class AdminModule extends JFrame {
         item.setForeground(new Color(255, 255, 255));
         item.setOpaque(true);
 
-        // Deshabilitar el foco visual por defecto
         item.setFocusPainted(false);
         item.setBorderPainted(false);
 
-        // Efectos hover mejorados
         item.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -170,20 +108,29 @@ public class AdminModule extends JFrame {
 
         // *Creamos el menú de Eventos */
         JMenu menuEventos = crearMenu("Eventos");
+        JMenu menuSubirArchivo = crearMenu("Subir Archivo");
 
         // * Creamos el ítem de menú para registrar eventos */
         JMenuItem itemRegistrarEvento = crearMenuItem("Registrar Evento");
         itemRegistrarEvento.addActionListener(e -> {
             cerrarVentanas();
             mostrarEventRegisterModule();
-
-            // * Quitar la selección del menú después de hacer clic */
             menuEventos.setSelected(false);
             menuBar.repaint();
         });
         menuEventos.add(itemRegistrarEvento);
 
+        JMenuItem itemSubirArchivo = crearMenuItem("Subir Archivo");
+        itemSubirArchivo.addActionListener(e -> {
+            cerrarVentanas();
+            mostrarUploadArchiveModule();
+            menuSubirArchivo.setSelected(false);
+            menuBar.repaint();
+        });
+        menuSubirArchivo.add(itemSubirArchivo);
+
         menuBar.add(menuEventos);
+        menuBar.add(menuSubirArchivo);
         return menuBar;
     }
 
@@ -192,6 +139,13 @@ public class AdminModule extends JFrame {
         desktopPane.add(registerModule);
         centrarInternalFrame(registerModule);
         registerModule.setVisible(true);
+    }
+
+    public void mostrarUploadArchiveModule() {
+        UploadArchiveFrame uploadModule = new UploadArchiveFrame(this);
+        desktopPane.add(uploadModule);
+        centrarInternalFrame(uploadModule);
+        uploadModule.setVisible(true);
     }
 
     public void cerrarVentanas() {
@@ -205,19 +159,6 @@ public class AdminModule extends JFrame {
         Dimension jInternalFrameSize = frame.getSize();
         frame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
                 (desktopSize.height - jInternalFrameSize.height) / 2);
-    }
-
-    // *Metodo para pedir al usuario que suba un archivo */
-    public void pedirArchivo() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Seleccionar archivo");
-        int userSelection = fileChooser.showOpenDialog(this);
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            // Aquí puedes manejar el archivo seleccionado
-            System.out.println("Archivo seleccionado: " + fileChooser.getSelectedFile().getAbsolutePath());
-        } else {
-            System.out.println("No se seleccionó ningún archivo.");
-        }
     }
 
     private void panelFondo() {
