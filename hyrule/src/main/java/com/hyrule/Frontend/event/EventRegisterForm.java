@@ -38,137 +38,160 @@ public class EventRegisterForm extends JInternalFrame {
 
     // *Creamos los componentes */
 
+    private JTextField createStyledTextField(String placeholder) {
+        Font fieldFont = new Font("Segoe UI", Font.PLAIN, 14);
+        Color fieldBorderColor = new Color(200, 200, 200);
+        Color fieldFocusColor = new Color(100, 149, 237);
+
+        JTextField field = new JTextField(placeholder) {
+            @Override
+            protected void paintBorder(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (isFocusOwner()) {
+                    g2.setColor(fieldFocusColor);
+                    g2.setStroke(new BasicStroke(2));
+                } else {
+                    g2.setColor(fieldBorderColor);
+                }
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+            }
+        };
+
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (field.getText().isEmpty()) {
+                    field.setText(placeholder);
+                    field.setForeground(Color.GRAY);
+                }
+            }
+        });
+        field.setFont(fieldFont);
+        field.setOpaque(false);
+        field.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        field.setBackground(new Color(255, 255, 255, 200));
+        return field;
+    }
+
+    private JButton createModernButton(String text, Color color) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(color);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
     private void initComponents() {
         JPanel panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                setBackground(new Color(245, 245, 245)); // fondo gris claro
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gp = new GradientPaint(0, 0, new Color(245, 245, 245),
+                        0, getHeight(), new Color(230, 230, 230));
+                g2.setPaint(gp);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                g2.setColor(new Color(0, 0, 0, 30));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
+                g2.dispose();
             }
         };
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(20, 10, 10, 10),
-                BorderFactory.createTitledBorder(
-                        BorderFactory.createLineBorder(new Color(100, 149, 237), 2, true),
-                        "Registro de Evento",
-                        TitledBorder.CENTER,
-                        TitledBorder.TOP,
-                        new Font("SansSerif", Font.BOLD, 16),
-                        new Color(60, 60, 60))));
-
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(15, 15, 15, 15);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        Font labelFont = new Font("SansSerif", Font.PLAIN, 14);
-        Font fieldFont = new Font("SansSerif", Font.PLAIN, 14);
+        txtCodigoEvento = createStyledTextField("EVT-XXX");
+        txtFechaEvento = createStyledTextField("DD/MM/YYYY");
+        txtTitulo = createStyledTextField("Título del Evento");
+        txtUbicacion = createStyledTextField("Ubicación del Evento");
 
-        JLabel lblCodigo = new JLabel("Código Evento:");
-        lblCodigo.setFont(labelFont);
-        txtCodigoEvento = new JTextField();
-        txtCodigoEvento.setFont(fieldFont);
-
-        JLabel lblFecha = new JLabel("Fecha Evento:");
-        lblFecha.setFont(labelFont);
-        txtFechaEvento = new JTextField("dd/MM/yyyy");
-        txtFechaEvento.setFont(fieldFont);
-        txtFechaEvento.setForeground(Color.GRAY);
-
-        JLabel lblTipo = new JLabel("Tipo Evento:");
-        lblTipo.setFont(labelFont);
         comboTipoEvento = new JComboBox<>(new String[] { "CHARLA", "CONGRESO", "TALLER", "DEBATE" });
-        comboTipoEvento.setFont(fieldFont);
+        comboTipoEvento.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        comboTipoEvento.setBackground(Color.WHITE);
+        comboTipoEvento.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
-        JLabel lblTitulo = new JLabel("Título:");
-        lblTitulo.setFont(labelFont);
-        txtTitulo = new JTextField();
-        txtTitulo.setFont(fieldFont);
-
-        JLabel lblUbicacion = new JLabel("Ubicación:");
-        lblUbicacion.setFont(labelFont);
-        txtUbicacion = new JTextField();
-        txtUbicacion.setFont(fieldFont);
-
-        JLabel lblCupoMax = new JLabel("Cupo Máximo:");
-        lblCupoMax.setFont(labelFont);
         spinnerCupoMax = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
-        spinnerCupoMax.setFont(fieldFont);
+        spinnerCupoMax.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(spinnerCupoMax, "#");
+        spinnerCupoMax.setEditor(editor);
+        editor.getTextField().setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+        editor.getTextField().setBackground(Color.WHITE);
 
-        btnRegistrar = new JButton("Registrar");
-        btnRegistrar.setBackground(new Color(100, 149, 237));
-        btnRegistrar.setForeground(Color.WHITE);
-        btnRegistrar.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btnRegistrar = createModernButton("Registrar", new Color(100, 149, 237));
+        btnCancelar = createModernButton("Cancelar", new Color(220, 53, 69));
+        btnRegresar = createModernButton("⬅️ Regresar", new Color(252, 141, 18));
 
-        btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBackground(new Color(220, 53, 69));
-        btnCancelar.setForeground(Color.WHITE);
-        btnCancelar.setFont(new Font("SansSerif", Font.BOLD, 14));
-
-        btnRegresar = new JButton("Inicio");
-        btnRegresar.setBackground(new Color(108, 117, 125));
-        btnRegresar.setFocusPainted(false);
-        btnRegresar.setForeground(Color.WHITE);
-        btnRegresar.setFont(new Font("SansSerif", Font.BOLD, 14));
-
-        // *Agregamos acciones a los botones */
         configurarAccionesBotones();
 
-        // *Organizamos los componentes en el panel*/
+        Font labelFont = new Font("Segoe UI", Font.PLAIN, 14);
+        JLabel lblCodigo = new JLabel("Código Evento:");
+        lblCodigo.setFont(labelFont);
+        JLabel lblFecha = new JLabel("Fecha Evento:");
+        lblFecha.setFont(labelFont);
+        JLabel lblTipo = new JLabel("Tipo Evento:");
+        lblTipo.setFont(labelFont);
+        JLabel lblTitulo = new JLabel("Título:");
+        lblTitulo.setFont(labelFont);
+        JLabel lblUbicacion = new JLabel("Ubicación:");
+        lblUbicacion.setFont(labelFont);
+        JLabel lblCupoMax = new JLabel("Cupo Máximo:");
+        lblCupoMax.setFont(labelFont);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         panel.add(lblCodigo, gbc);
         gbc.gridx = 1;
-        gbc.gridy = 1;
         panel.add(txtCodigoEvento, gbc);
-
         gbc.gridx = 0;
         gbc.gridy = 2;
         panel.add(lblFecha, gbc);
         gbc.gridx = 1;
-        gbc.gridy = 2;
         panel.add(txtFechaEvento, gbc);
-
         gbc.gridx = 0;
         gbc.gridy = 3;
         panel.add(lblTipo, gbc);
         gbc.gridx = 1;
-        gbc.gridy = 3;
         panel.add(comboTipoEvento, gbc);
-
         gbc.gridx = 0;
         gbc.gridy = 4;
         panel.add(lblTitulo, gbc);
         gbc.gridx = 1;
-        gbc.gridy = 4;
         panel.add(txtTitulo, gbc);
-
         gbc.gridx = 0;
         gbc.gridy = 5;
         panel.add(lblUbicacion, gbc);
         gbc.gridx = 1;
-        gbc.gridy = 5;
         panel.add(txtUbicacion, gbc);
-
         gbc.gridx = 0;
         gbc.gridy = 6;
         panel.add(lblCupoMax, gbc);
         gbc.gridx = 1;
-        gbc.gridy = 6;
         panel.add(spinnerCupoMax, gbc);
-
         gbc.gridx = 0;
         gbc.gridy = 7;
         panel.add(btnRegistrar, gbc);
         gbc.gridx = 1;
-        gbc.gridy = 7;
         panel.add(btnCancelar, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 2;
         panel.add(btnRegresar, gbc);
 
         add(panel);
