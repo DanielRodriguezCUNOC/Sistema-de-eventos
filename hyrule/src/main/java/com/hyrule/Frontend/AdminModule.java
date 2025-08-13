@@ -1,187 +1,124 @@
 package com.hyrule.Frontend;
 
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.InputStream;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.hyrule.Frontend.event.EventRegisterForm;
 import com.hyrule.Frontend.loadarchive.UploadArchiveFrame;
+import com.hyrule.Frontend.participant.ParticipantRegisterForm;
 
 public class AdminModule extends JFrame {
 
     private JDesktopPane desktopPane;
-    private JPanel panelFondo;
+    private JPanel sidebar;
 
     public AdminModule() {
-        setTitle("Módulo Administrador");
-        setSize(1000, 740);
-        setResizable(false);
+        setTitle("Módulo Administrador - Dashboard");
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        desktopPane = new JDesktopPane() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                setBackground(new Color(240, 242, 245));
-            }
-        };
+        sidebar = crearSidebar();
+        add(sidebar, BorderLayout.WEST);
 
-        setContentPane(desktopPane);
-        setJMenuBar(crearMenuBar());
-        panelFondo();
-
+        desktopPane = new JDesktopPane();
+        desktopPane.setBackground(new Color(240, 242, 245));
+        add(desktopPane, BorderLayout.CENTER);
         setVisible(true);
+        mostrarVistaInicio();
     }
 
-    /**
-     * The function `crearMenu` creates a customized JMenu component with specific
-     * styling and mouse
-     * hover effects.
-     * 
-     * @param titulo The parameter "titulo" in the method "crearMenu" represents the
-     *               title of the menu
-     *               that will be created. This title will be displayed at the top
-     *               of the menu when it is rendered in
-     *               a graphical user interface.
-     * @return The method `crearMenu` is returning a `JMenu` object that has been
-     *         customized with a
-     *         specific font, background color, border, foreground color, and mouse
-     *         listener for hover effects.
-     */
-    private JMenu crearMenu(String titulo) {
-        JMenu menu = new JMenu(titulo);
-        menu.setFont(new Font("SansSerif", Font.BOLD, 15));
-        menu.setBackground(new Color(33, 141, 230));
-        menu.setBorder(new EmptyBorder(5, 20, 5, 20));
-        menu.setForeground(new Color(255, 255, 255));
-        menu.setOpaque(true);
+    private JPanel crearSidebar() {
+        JPanel panel = new JPanel();
+        panel.setBackground(new Color(33, 37, 41));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setPreferredSize(new Dimension(200, getHeight()));
 
-        menu.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                menu.setBackground(new Color(33, 141, 230));
-                menu.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                menu.repaint();
-            }
+        JLabel titulo = new JLabel("ADMIN");
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 20));
+        titulo.setForeground(Color.WHITE);
+        titulo.setBorder(new EmptyBorder(20, 20, 20, 20));
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
 
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                menu.setBackground(new Color(33, 141, 230));
-                menu.setSelected(false);
-                menu.repaint();
-            }
-        });
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(crearBotonMenu("Inicio", () -> mostrarVistaInicio()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Eventos", () -> mostrarEventRegisterModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Subir Archivo", () -> mostrarUploadArchiveModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Participantes", () -> mostrarParticipantRegisterModule()));
+        panel.add(Box.createVerticalGlue());
+        panel.add(crearBotonMenu("Salir", () -> System.exit(0)));
 
-        return menu;
+        return panel;
     }
 
-    /**
-     * The function `crearMenuItem` creates a customized JMenuItem with specific
-     * styling and hover effects
-     * in Java.
-     * 
-     * @param texto The `texto` parameter in the `crearMenuItem` method is a
-     *              `String` that represents the
-     *              text that will be displayed on the `JMenuItem` created by this
-     *              method. It is essentially the label
-     *              or text content of the menu item.
-     * @return The method `crearMenuItem` is returning a `JMenuItem` object with
-     *         customized properties such
-     *         as font, background color, border, and hover effects.
-     */
-    private JMenuItem crearMenuItem(String texto) {
-        JMenuItem item = new JMenuItem(texto);
-        item.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        item.setBackground(new Color(33, 141, 230));
-        item.setBorder(new EmptyBorder(8, 20, 8, 20));
-        item.setForeground(new Color(255, 255, 255));
-        item.setOpaque(true);
+    private JButton crearBotonMenu(String texto, Runnable accion) {
+        JButton btn = new JButton(texto);
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(180, 100));
+        if (texto.equals("Salir")) {
+            btn.setBackground(new Color(220, 53, 69));
+        } else {
+            btn.setBackground(new Color(52, 58, 64));
+            btn.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    btn.setBackground(new Color(73, 80, 87));
+                }
 
-        item.setFocusPainted(false);
-        item.setBorderPainted(false);
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    btn.setBackground(new Color(52, 58, 64));
+                }
+            });
+        }
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("SansSerif", Font.BOLD, 16));
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.addActionListener(e -> accion.run());
+        btn.setMargin(new Insets(5, 15, 5, 5));
 
-        item.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                item.setBackground(new Color(33, 141, 230));
-                item.setForeground(Color.WHITE);
-                item.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                item.setSelected(false);
-                item.repaint();
-            }
-
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                item.setBackground(new Color(33, 141, 230));
-                item.setForeground(Color.WHITE);
-                item.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                item.setSelected(false);
-                item.repaint();
-            }
-        });
-
-        return item;
+        return btn;
     }
 
-    /**
-     * The function `crearMenuBar` creates a custom menu bar with a specific
-     * background color and border,
-     * including a "Eventos" menu with an item to register events that triggers a
-     * specific action when
-     * clicked.
-     * 
-     * @return The method `crearMenuBar()` is returning a `JMenuBar` object that has
-     *         been customized with a
-     *         background color, border, and a menu item for registering events
-     *         under the "Eventos" menu.
-     */
-    private JMenuBar crearMenuBar() {
-        // *Creamos la barra de menú */
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.setBackground(new Color(33, 37, 41));
-        menuBar.setBorder(new EmptyBorder(5, 10, 5, 10));
+    private void mostrarVistaInicio() {
+        cerrarVentanas();
 
-        // *Creamos el menú de Eventos */
-        JMenu menuEventos = crearMenu("Eventos");
-        JMenu menuSubirArchivo = crearMenu("Subir Archivo");
-
-        // * Creamos el ítem de menú para registrar eventos */
-        JMenuItem itemRegistrarEvento = crearMenuItem("Registrar Evento");
-        itemRegistrarEvento.addActionListener(e -> {
-            cerrarVentanas();
-            mostrarEventRegisterModule();
-            menuEventos.setSelected(false);
-            menuBar.repaint();
-        });
-        menuEventos.add(itemRegistrarEvento);
-
-        JMenuItem itemSubirArchivo = crearMenuItem("Subir Archivo");
-        itemSubirArchivo.addActionListener(e -> {
-            cerrarVentanas();
-            mostrarUploadArchiveModule();
-            menuSubirArchivo.setSelected(false);
-            menuBar.repaint();
-        });
-        menuSubirArchivo.add(itemSubirArchivo);
-
-        menuBar.add(menuEventos);
-        menuBar.add(Box.createHorizontalStrut(10));
-        menuBar.add(menuSubirArchivo);
-        return menuBar;
+        try (InputStream imgStream = getClass().getResourceAsStream("/com/hyrule/resources/images/fondo.png")) {
+            if (imgStream != null) {
+                Image imagen = ImageIO.read(imgStream);
+                JPanel panelInicio = new JPanel() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+                    }
+                };
+                panelInicio.setBackground(new Color(240, 242, 245));
+                panelInicio.setBounds(0, 0, desktopPane.getWidth(), desktopPane.getHeight());
+                desktopPane.add(panelInicio);
+            } else {
+                System.err.println("No se pudo cargar la imagen de fondo.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        desktopPane.repaint();
+        desktopPane.revalidate();
     }
 
-    /**
-     * The function `mostrarEventRegisterModule` creates and displays an
-     * `EventRegisterForm` internal
-     * frame on a desktop pane.
-     */
     public void mostrarEventRegisterModule() {
+        cerrarVentanas();
         EventRegisterForm registerModule = new EventRegisterForm(this);
         desktopPane.add(registerModule);
         centrarInternalFrame(registerModule);
@@ -189,16 +126,27 @@ public class AdminModule extends JFrame {
     }
 
     public void mostrarUploadArchiveModule() {
+        cerrarVentanas();
         UploadArchiveFrame uploadModule = new UploadArchiveFrame(this);
         desktopPane.add(uploadModule);
         centrarInternalFrame(uploadModule);
         uploadModule.setVisible(true);
     }
 
+    public void mostrarParticipantRegisterModule() {
+        cerrarVentanas();
+        ParticipantRegisterForm participantModule = new ParticipantRegisterForm(this);
+        desktopPane.add(participantModule);
+        centrarInternalFrame(participantModule);
+        participantModule.setVisible(true);
+    }
+
     public void cerrarVentanas() {
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
             frame.dispose();
         }
+        // desktopPane.removeAll();
+        desktopPane.repaint();
     }
 
     private void centrarInternalFrame(JInternalFrame frame) {
@@ -208,52 +156,7 @@ public class AdminModule extends JFrame {
                 (desktopSize.height - jInternalFrameSize.height) / 2);
     }
 
-    private void panelFondo() {
-        InputStream imgStream = getClass().getResourceAsStream("/com/hyrule/resources/images/fondo.png");
-        panelFondo = new JPanel(new BorderLayout());
-        panelFondo.setBackground(new Color(245, 247, 250));
-
-        if (imgStream == null) {
-            System.err.println("No se pudo cargar la imagen de fondo.");
-            return;
-
-        }
-        try {
-            Image originalImage = ImageIO.read(imgStream);
-            panelFondo.setOpaque(false);
-            JLabel lblImage = new JLabel() {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    int altura = desktopPane.getHeight();
-                    int ancho = desktopPane.getWidth();
-                    double imgRatio = (double) originalImage.getWidth(null) / originalImage.getHeight(null);
-                    int nuevaAnchura = ancho;
-                    int nuevaAltura = (int) (nuevaAnchura / imgRatio);
-
-                    if (nuevaAltura > altura) {
-                        nuevaAltura = altura;
-                        nuevaAnchura = (int) (nuevaAltura * imgRatio);
-
-                    }
-                    int x = (ancho - nuevaAnchura) / 2;
-
-                    g.drawImage(originalImage, x, 0, nuevaAnchura, nuevaAltura, this);
-                }
-            };
-            panelFondo.add(lblImage, BorderLayout.CENTER);
-            panelFondo.setBounds(0, 0, desktopPane.getWidth(), desktopPane.getHeight());
-            desktopPane.add(panelFondo);
-
-            desktopPane.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    panelFondo.setSize(desktopPane.getSize());
-                    lblImage.repaint();
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(AdminModule::new);
     }
-
 }
