@@ -15,6 +15,14 @@ public class ParticipantModel {
         this.institucion = institucion;
     }
 
+    public ParticipantModel(String correo_participante, String nombre_completo,
+            String tipo_participante, String institucion) {
+        this.correo_participante = correo_participante;
+        this.nombre_completo = nombre_completo;
+        this.tipo_participante = ParticipantType.valueOf(tipo_participante.toUpperCase());
+        this.institucion = institucion;
+    }
+
     // * Getters y Setters */
     public String getCorreo_participante() {
         return correo_participante;

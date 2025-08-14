@@ -1,14 +1,13 @@
 package com.hyrule.Frontend.participant;
 
-import com.hyrule.Backend.Validations.ValidateParticipantRegister;
 import com.hyrule.Backend.handler.ParticipantRegisterHandler;
+import com.hyrule.Backend.model.participant.ParticipantModel;
 import com.hyrule.Frontend.AdminModule;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 public class ParticipantRegisterForm extends JInternalFrame {
@@ -248,26 +247,24 @@ public class ParticipantRegisterForm extends JInternalFrame {
         String institucion = txtInstitucion.getText().trim();
         String tipoParticipante = (String) comboTipoParticipante.getSelectedItem();
 
-        // *Validar los campos */
-        ValidateParticipantRegister validator = new ValidateParticipantRegister(correo, nombre, institucion,
-                tipoParticipante);
+        ParticipantModel participante = new ParticipantModel(correo, nombre, tipoParticipante, institucion);
 
-        if (validator.isValid()) {
-            // * Si los campos son válidos, procesar el registro del participante */
-            ParticipantRegisterHandler participantHandler = new ParticipantRegisterHandler();
-            boolean exito = participantHandler.registerParticipantFromForm(correo, nombre, tipoParticipante,
-                    institucion);
-            if (exito) {
-                JOptionPane.showMessageDialog(this, "Participante registrado exitosamente.", "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Error al registrar el participante.", "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+        ParticipantRegisterHandler handler = new ParticipantRegisterHandler();
+        if (handler.isValid(participante)) {
+            JOptionPane.showMessageDialog(this, "Participante registrado exitosamente.",
+                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+            // *Limpiar los campos */
+            txtCorreo.setText("");
+            txtNombre.setText("");
+            txtInstitucion.setText("");
+            comboTipoParticipante.setSelectedIndex(0);
+
         } else {
-            JOptionPane.showMessageDialog(this, "Error de validación", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al registrar el participante. "
+                    + "Verifique los datos ingresados.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
 }
