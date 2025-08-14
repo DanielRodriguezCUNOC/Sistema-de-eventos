@@ -1,11 +1,10 @@
 package com.hyrule.Frontend.event;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
-import com.hyrule.Backend.Validations.ValidateEventRegister;
 import com.hyrule.Backend.handler.EventRegisterHandler;
+import com.hyrule.Backend.model.event.EventModel;
 import com.hyrule.Frontend.AdminModule;
 
 import java.awt.*;
@@ -16,8 +15,9 @@ public class EventRegisterForm extends JInternalFrame {
     private JTextField txtFechaEvento;
     private JComboBox<String> comboTipoEvento;
     private JTextField txtTitulo;
-    private JTextField txtUbicacion;
     private JSpinner spinnerCupoMax;
+    private JTextField txtUbicacion;
+    private JTextField txtCostoEvento;
     private JButton btnRegistrar;
     private JButton btnCancelar;
     private JButton btnRegresar;
@@ -27,9 +27,10 @@ public class EventRegisterForm extends JInternalFrame {
 
         super("", true, true, true, true);
         this.adminView = adminView;
+        adminView.setTitle("Registro de Eventos");
 
         setLayout(new BorderLayout());
-        setSize(1000, 740);
+        setSize(1000, 750);
         initComponents();
 
         modificarVentana();
@@ -119,6 +120,7 @@ public class EventRegisterForm extends JInternalFrame {
         txtFechaEvento = createStyledTextField("DD/MM/YYYY");
         txtTitulo = createStyledTextField("Título del Evento");
         txtUbicacion = createStyledTextField("Ubicación del Evento");
+        txtCostoEvento = createStyledTextField("Costo del Evento");
 
         comboTipoEvento = new JComboBox<>(new String[] { "CHARLA", "CONGRESO", "TALLER", "DEBATE" });
         comboTipoEvento.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -155,6 +157,8 @@ public class EventRegisterForm extends JInternalFrame {
         lblUbicacion.setFont(labelFont);
         JLabel lblCupoMax = new JLabel("Cupo Máximo:");
         lblCupoMax.setFont(labelFont);
+        JLabel lblCosto = new JLabel("Costo Evento:");
+        lblCosto.setFont(labelFont);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -186,8 +190,14 @@ public class EventRegisterForm extends JInternalFrame {
         panel.add(lblCupoMax, gbc);
         gbc.gridx = 1;
         panel.add(spinnerCupoMax, gbc);
+
         gbc.gridx = 0;
         gbc.gridy = 7;
+        panel.add(lblCosto, gbc);
+        gbc.gridx = 1;
+        panel.add(txtCostoEvento, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 8;
         panel.add(btnRegistrar, gbc);
         gbc.gridx = 1;
         panel.add(btnCancelar, gbc);
@@ -218,22 +228,28 @@ public class EventRegisterForm extends JInternalFrame {
         String ubicacion = txtUbicacion.getText().trim();
         int cupoMax = (Integer) spinnerCupoMax.getValue();
 
-        // * Validar los campos del formulario */
-        ValidateEventRegister validator = new ValidateEventRegister(codigo, fechaStr, tipoStr, titulo, ubicacion,
-                cupoMax);
+        EventModel evento = new EventModel(codigo, fechaStr, tipoStr, titulo, ubicacion, cupoMax);
 
-        if (validator.isValid()) {
+        EventRegisterHandler validator = new EventRegisterHandler();
 
-            // * Si los campos son válidos, procesar el registro del evento */
-            EventRegisterHandler eventHandler = new EventRegisterHandler();
-            boolean exito = eventHandler.registerEventFromForm(codigo, fechaStr, tipoStr, titulo, ubicacion, cupoMax);
-            if (exito) {
-                JOptionPane.showMessageDialog(this, "Evento registrado exitosamente.", "Éxito",
+        if (validator.isValid(evento)) {
+            // * Si el evento es válido, lo registramos */
+            if (validator.isValid(evento)) {
+                JOptionPane.showMessageDialog(this, "Evento registrado exitosamente", "Éxito",
                         JOptionPane.INFORMATION_MESSAGE);
+                // * Limpiar los campos del formulario */
+                txtCodigoEvento.setText("");
+                txtFechaEvento.setText("");
+                comboTipoEvento.setSelectedIndex(0);
+                txtTitulo.setText("");
+                txtUbicacion.setText("");
+                spinnerCupoMax.setValue(1);
             } else {
-                JOptionPane.showMessageDialog(this, "Error al registrar el evento.", "Error",
+                JOptionPane.showMessageDialog(this, "Error al registrar el evento, Verifique los datos ingresados",
+                        "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
+
         } else {
             JOptionPane.showMessageDialog(this, "Error de validación", "Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -285,7 +301,7 @@ public class EventRegisterForm extends JInternalFrame {
     private void cancelEventAction() {
         // * Limpiar los campos del formulario */
         txtCodigoEvento.setText("");
-        txtFechaEvento.setText("YYYY-MM-DD");
+        txtFechaEvento.setText("");
         comboTipoEvento.setSelectedIndex(0);
         txtTitulo.setText("");
         txtUbicacion.setText("");

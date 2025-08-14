@@ -10,7 +10,8 @@ public class EventModel {
     private String ubicacionEvento;
     private Integer cupoMaxParticipantes;
 
-    public EventModel(String codigoEvento, LocalDate fechaEvento, EventType tipoEvento, String tituloEvento, String ubicacionEvento, Integer cupoMaxParticipantes) {
+    public EventModel(String codigoEvento, LocalDate fechaEvento, EventType tipoEvento, String tituloEvento,
+            String ubicacionEvento, Integer cupoMaxParticipantes) {
         this.codigoEvento = codigoEvento;
         this.fechaEvento = fechaEvento;
         this.tipoEvento = tipoEvento;
@@ -19,45 +20,66 @@ public class EventModel {
         this.cupoMaxParticipantes = cupoMaxParticipantes;
     }
 
-    //* Getters y Setters */
+    public EventModel(String codigoEvento, String fechaEvento, String tipoEvento, String tituloEvento,
+            String ubicacionEvento, Integer cupoMaxParticipantes) {
+        this.codigoEvento = codigoEvento;
+        this.fechaEvento = LocalDate.parse(fechaEvento);
+        this.tipoEvento = EventType.valueOf(tipoEvento.toUpperCase());
+        this.tituloEvento = tituloEvento;
+        this.ubicacionEvento = ubicacionEvento;
+        this.cupoMaxParticipantes = cupoMaxParticipantes;
+    }
+
+    // * Getters y Setters */
     public String getCodigoEvento() {
         return codigoEvento;
     }
+
     public void setCodigoEvento(String codigoEvento) {
         this.codigoEvento = codigoEvento;
     }
+
     public LocalDate getFechaEvento() {
         return fechaEvento;
     }
+
     public void setFechaEvento(LocalDate fechaEvento) {
         this.fechaEvento = fechaEvento;
-    }   
+    }
+
     public EventType getTipoEvento() {
         return tipoEvento;
     }
+
     public void setTipoEvento(EventType tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
+
     public String getTituloEvento() {
         return tituloEvento;
     }
+
     public void setTituloEvento(String tituloEvento) {
         this.tituloEvento = tituloEvento;
     }
+
     public String getUbicacionEvento() {
         return ubicacionEvento;
     }
+
     public void setUbicacionEvento(String ubicacionEvento) {
         this.ubicacionEvento = ubicacionEvento;
     }
+
     public Integer getCupoMaxParticipantes() {
         return cupoMaxParticipantes;
     }
+
     public void setCupoMaxParticipantes(Integer cupoMaxParticipantes) {
         this.cupoMaxParticipantes = cupoMaxParticipantes;
     }
 
-    //* Funcion toString para representar el evento como un String */
+    // * Funcion toString para representar el evento como un String */
     @Override
     public String toString() {
         return "Evento{" +
