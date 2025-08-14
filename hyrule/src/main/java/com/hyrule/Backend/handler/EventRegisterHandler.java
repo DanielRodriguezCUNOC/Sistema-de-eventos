@@ -15,8 +15,9 @@ public class EventRegisterHandler implements RegisterHandler {
 
     // *Expresion regular para validar el registro de eventos */
     private static final Pattern PATRON = Pattern.compile(
-            "^REGISTRO_EVENTO\\(\"(EVT-\\d{3})\",\"(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})\"," +
-                    "\"(CHARLA|CONGRESO|TALLER|DEBATE)\",\"([^\"]+)\",\"([^\"]{1,150})\",(\\d+)\\);$");
+            "^REGISTRO_EVENTO\\s*\\(\\s*\"(EVT-\\d{8})\"\\s*,\\s*\"(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})\"\\s*,"
+                    +
+                    "\\s*\"(CHARLA|CONGRESO|TALLER|DEBATE)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9\\-\\s]+)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.,()\\-\\s]{1,150})\"\\s*,\\s*(\\d+)\\s*,\\s*(\\d+(\\.\\d{1,2})?)\\s*\\);$");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // * Creamos una instacia para ingresar los datos a la BD */
@@ -53,21 +54,40 @@ public class EventRegisterHandler implements RegisterHandler {
 
     // *Metodo para registrar un evento desde el formulario*/
 
-    public boolean registerEventFromForm(String codigo, String fechaStr, String tipoStr, String titulo,
-            String ubicacion, int cupoMax) {
+    public boolean isValid(EventModel evento) {
         try {
-            LocalDate fecha = LocalDate.parse(fechaStr, DATE_FORMAT);
-            EventType tipo = EventType.valueOf(tipoStr.toUpperCase());
+            if (evento == null) {
+                return false;
+            }
 
-            // *Creamos un objeto que representa la tabla en la BD */
-            EventModel event = new EventModel(codigo, fecha, tipo, titulo, ubicacion, cupoMax);
+            // *Validamos la integridad de los datos */
+            if (!validateDataIntegrity(evento)) {
+                return false;
+            }
 
-            // *Enviamos los datos para insertarlos en la BD */
-            return control.insert(event) != null;
+            // *Insertamos el evento en la base de datos */
+            return control.insert(evento) != null;
 
         } catch (Exception e) {
-            System.out.println("Error al registrar el evento desde el formulario: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
+    }
+
+    // *Validamos la integridad de los datos */
+    private boolean validateDataIntegrity(EventModel evento) {
+        return evento.getCodigoEvento() != null && !evento.getCodigoEvento().isEmpty()
+                && evento.getFechaEvento() != null && evento.getTipoEvento() != null
+                && evento.getTituloEvento() != null && !evento.getTituloEvento().isEmpty()
+                && evento.getUbicacionEvento() != null && !evento.getUbicacionEvento().isEmpty()
+                && evento.getCupoMaxParticipantes() != null && evento.getCupoMaxParticipantes() > 0
+                && Pattern.compile("^EVT-\\d{8}$").matcher(evento.getCodigoEvento()).matches()
+                && evento.getFechaEvento().format(DATE_FORMAT)
+                        .matches("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$")
+                && Pattern.compile("^(CHARLA|CONGRESO|TALLER|DEBATE)$").matcher(evento.getTipoEvento().name()).matches()
+                && Pattern.compile("^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9\\-\\s]{1,150}$").matcher(evento.getTituloEvento()).matches()
+                && Pattern.compile("^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.,()\\-\\s]{1,150}$").matcher(evento.getUbicacionEvento())
+                        .matches()
+                && evento.getCupoMaxParticipantes() > 0;
     }
 }
