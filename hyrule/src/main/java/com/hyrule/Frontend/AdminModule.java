@@ -6,9 +6,15 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import com.hyrule.Frontend.activity.ActivityRegisterForm;
+import com.hyrule.Frontend.attendance.AttendanceRegisterForm;
+import com.hyrule.Frontend.certified.CertifiedRegisterForm;
 import com.hyrule.Frontend.event.EventRegisterForm;
 import com.hyrule.Frontend.loadarchive.UploadArchiveFrame;
 import com.hyrule.Frontend.participant.ParticipantRegisterForm;
+import com.hyrule.Frontend.payment.PaymentRegisterForm;
+import com.hyrule.Frontend.registration.InscripcionRegisterForm;
+import com.hyrule.Frontend.validate_registration.ValidateRegistrationForm;
 
 public class AdminModule extends JFrame {
 
@@ -49,11 +55,24 @@ public class AdminModule extends JFrame {
         panel.add(Box.createVerticalStrut(20));
         panel.add(crearBotonMenu("Inicio", () -> mostrarVistaInicio()));
         panel.add(Box.createVerticalStrut(10));
-        panel.add(crearBotonMenu("Eventos", () -> mostrarEventRegisterModule()));
-        panel.add(Box.createVerticalStrut(10));
         panel.add(crearBotonMenu("Subir Archivo", () -> mostrarUploadArchiveModule()));
         panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Eventos", () -> mostrarEventRegisterModule()));
+        panel.add(Box.createVerticalStrut(10));
         panel.add(crearBotonMenu("Participantes", () -> mostrarParticipantRegisterModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Actividades", () -> mostrarActivityRegisterModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Inscripción", () -> mostrarInscripcionRegisterModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Pagos", () -> mostrarPaymentRegisterModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Validar Inscripción", () -> mostrarValidateRegistrationModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Asistencia", () -> mostrarAttendanceRegisterModule()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearBotonMenu("Certificados", () -> mostrarCertifiedRegisterModule()));
+        panel.add(Box.createVerticalStrut(20));
         panel.add(Box.createVerticalGlue());
         panel.add(crearBotonMenu("Salir", () -> System.exit(0)));
 
@@ -117,7 +136,7 @@ public class AdminModule extends JFrame {
         desktopPane.revalidate();
     }
 
-    public void mostrarEventRegisterModule() {
+    private void mostrarEventRegisterModule() {
         cerrarVentanas();
         EventRegisterForm registerModule = new EventRegisterForm(this);
         desktopPane.add(registerModule);
@@ -125,7 +144,7 @@ public class AdminModule extends JFrame {
         registerModule.setVisible(true);
     }
 
-    public void mostrarUploadArchiveModule() {
+    private void mostrarUploadArchiveModule() {
         cerrarVentanas();
         UploadArchiveFrame uploadModule = new UploadArchiveFrame(this);
         desktopPane.add(uploadModule);
@@ -133,12 +152,60 @@ public class AdminModule extends JFrame {
         uploadModule.setVisible(true);
     }
 
-    public void mostrarParticipantRegisterModule() {
+    private void mostrarParticipantRegisterModule() {
         cerrarVentanas();
         ParticipantRegisterForm participantModule = new ParticipantRegisterForm(this);
         desktopPane.add(participantModule);
         centrarInternalFrame(participantModule);
         participantModule.setVisible(true);
+    }
+
+    private void mostrarActivityRegisterModule() {
+        cerrarVentanas();
+        ActivityRegisterForm activityModule = new ActivityRegisterForm(this);
+        desktopPane.add(activityModule);
+        centrarInternalFrame(activityModule);
+        activityModule.setVisible(true);
+    }
+
+    private void mostrarAttendanceRegisterModule() {
+        cerrarVentanas();
+        AttendanceRegisterForm attendanceModule = new AttendanceRegisterForm(this);
+        desktopPane.add(attendanceModule);
+        centrarInternalFrame(attendanceModule);
+        attendanceModule.setVisible(true);
+    }
+
+    private void mostrarInscripcionRegisterModule() {
+        cerrarVentanas();
+        InscripcionRegisterForm inscripcionModule = new InscripcionRegisterForm(this);
+        desktopPane.add(inscripcionModule);
+        centrarInternalFrame(inscripcionModule);
+        inscripcionModule.setVisible(true);
+    }
+
+    private void mostrarCertifiedRegisterModule() {
+        cerrarVentanas();
+        CertifiedRegisterForm certifiedModule = new CertifiedRegisterForm(this);
+        desktopPane.add(certifiedModule);
+        centrarInternalFrame(certifiedModule);
+        certifiedModule.setVisible(true);
+    }
+
+    private void mostrarPaymentRegisterModule() {
+        cerrarVentanas();
+        PaymentRegisterForm paymentModule = new PaymentRegisterForm(this);
+        desktopPane.add(paymentModule);
+        centrarInternalFrame(paymentModule);
+        paymentModule.setVisible(true);
+    }
+
+    private void mostrarValidateRegistrationModule() {
+        cerrarVentanas();
+        ValidateRegistrationForm validateModule = new ValidateRegistrationForm(this);
+        desktopPane.add(validateModule);
+        centrarInternalFrame(validateModule);
+        validateModule.setVisible(true);
     }
 
     public void cerrarVentanas() {
@@ -154,9 +221,5 @@ public class AdminModule extends JFrame {
         Dimension jInternalFrameSize = frame.getSize();
         frame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
                 (desktopSize.height - jInternalFrameSize.height) / 2);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(AdminModule::new);
     }
 }
