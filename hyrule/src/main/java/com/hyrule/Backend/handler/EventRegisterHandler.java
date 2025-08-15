@@ -17,7 +17,7 @@ public class EventRegisterHandler implements RegisterHandler {
     private static final Pattern PATRON = Pattern.compile(
             "^REGISTRO_EVENTO\\s*\\(\\s*\"(EVT-\\d{8})\"\\s*,\\s*\"(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})\"\\s*,"
                     +
-                    "\\s*\"(CHARLA|CONGRESO|TALLER|DEBATE)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9\\-\\s]+)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.,()\\-\\s]{1,150})\"\\s*,\\s*(\\d+)\\s*,\\s*(\\d+(\\.\\d{1,2})?)\\s*\\);$");
+                    "\\s*\"(CHARLA|CONGRESO|TALLER|1DEBATE)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9\\-\\s]+)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.,()\\-\\s]{1,150})\"\\s*,\\s*(\\d+)\\s*,\\s*(\\d+(\\.\\d{1,2})?)\\s*\\);$");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // * Creamos una instacia para ingresar los datos a la BD */
