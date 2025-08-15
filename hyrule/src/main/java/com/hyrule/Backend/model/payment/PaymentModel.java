@@ -23,6 +23,9 @@ public class PaymentModel {
         this.monto = new BigDecimal(montoStr);
     }
 
+    public PaymentModel() {
+    }
+
     // *Getters y Setters*/
 
     public String getCodigoEvento() {
