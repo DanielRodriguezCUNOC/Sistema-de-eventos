@@ -8,7 +8,14 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.hyrule.Backend.handler.ActivityRegisterHandler;
+import com.hyrule.Backend.handler.AttendanceRegisterHandler;
+import com.hyrule.Backend.handler.CertifiedRegisterHandler;
 import com.hyrule.Backend.handler.EventRegisterHandler;
+import com.hyrule.Backend.handler.InscripcionRegisterHandler;
+import com.hyrule.Backend.handler.ParticipantRegisterHandler;
+import com.hyrule.Backend.handler.PaymentRegisterHandler;
+import com.hyrule.Backend.handler.ValidateInscripcionRegisterHandler;
 import com.hyrule.interfaces.RegisterHandler;
 
 public class ProcessorArchive {
@@ -18,7 +25,23 @@ public class ProcessorArchive {
     public ProcessorArchive() {
 
         // * Mapeo de tipos de eventos a sus respectivos manejadores */
+
         handlers.put("REGISTRO_EVENTO", new EventRegisterHandler());
+
+        handlers.put("REGISTRO_PARTICIPANTE", new ParticipantRegisterHandler());
+
+        handlers.put("REGISTRO_ACTIVIDAD", new ActivityRegisterHandler());
+
+        handlers.put("INSCRIPCION", new InscripcionRegisterHandler());
+
+        handlers.put("CERTIFICADO", new CertifiedRegisterHandler());
+
+        handlers.put("VALIDAR_INSCRIPCION", new ValidateInscripcionRegisterHandler());
+
+        handlers.put("ASISTENCIA", new AttendanceRegisterHandler());
+
+        handlers.put("PAGO", new PaymentRegisterHandler());
+
     }
 
     public void procesarArchivo(Path filePath) {
@@ -28,9 +51,11 @@ public class ProcessorArchive {
                 BufferedWriter logWriter = new BufferedWriter(new FileWriter(logPath.toFile(), true))) {
             String linea;
             while ((linea = br.readLine()) != null) {
-                linea = linea.trim(); // * Eliminar espacios en blanco */
+                // * Eliminar espacios en blanco */
+                linea = linea.trim();
+                // * Ignorar líneas vacías */
                 if (linea.isEmpty()) {
-                    continue; // * Ignorar líneas vacías */
+                    continue;
                 }
                 String comando = extraerComando(linea);
                 RegisterHandler handler = handlers.get(comando);

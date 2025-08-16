@@ -5,10 +5,15 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import com.hyrule.Backend.handler.EventRegisterHandler;
 import com.hyrule.Backend.model.event.EventModel;
+import com.hyrule.Backend.model.event.EventType;
 import com.hyrule.Frontend.AdminModule;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class EventRegisterForm extends JInternalFrame {
     private JTextField txtCodigoEvento;
@@ -222,38 +227,57 @@ public class EventRegisterForm extends JInternalFrame {
     private void registrarEvento() {
 
         String codigo = txtCodigoEvento.getText().trim();
-        String fechaStr = txtFechaEvento.getText().trim();
-        String tipoStr = (String) comboTipoEvento.getSelectedItem();
-        String titulo = txtTitulo.getText().trim();
-        String ubicacion = txtUbicacion.getText().trim();
-        int cupoMax = (Integer) spinnerCupoMax.getValue();
 
-        EventModel evento = new EventModel(codigo, fechaStr, tipoStr, titulo, ubicacion, cupoMax);
+        String fechaStr = txtFechaEvento.getText().trim();
+
+        String tipoStr = (String) comboTipoEvento.getSelectedItem();
+
+        String titulo = txtTitulo.getText().trim();
+
+        String ubicacion = txtUbicacion.getText().trim();
+
+        int cupoMax = (Integer) spinnerCupoMax.getValue();
+        String costoEventoStr = txtCostoEvento.getText().trim();
+
+        EventModel evento = null;
+
+        try {
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            LocalDate fechaEvento = LocalDate.parse(fechaStr, formatter);
+
+            EventType tipoEvento = EventType.valueOf(tipoStr.toUpperCase());
+
+            BigDecimal costoEvento = new BigDecimal(txtCostoEvento.getText().trim());
+
+            evento = new EventModel(codigo, fechaEvento, tipoEvento, titulo, ubicacion, cupoMax, costoEvento);
+
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Formato de fecha inválido. Use dd/MM/yyyy",
+                    "Error de validación", JOptionPane.ERROR_MESSAGE);
+            return;
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Tipo de evento inválido.",
+                    "Error de validación", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         EventRegisterHandler validator = new EventRegisterHandler();
 
-        if (validator.isValid(evento)) {
-            // * Si el evento es válido, lo registramos */
-            if (validator.isValid(evento)) {
+        String validationMsg = validator.validateForm(evento, fechaStr, costoEventoStr);
+
+        if ("Ok".equals(validationMsg)) {
+            if (validator.insertFromForm(evento)) {
                 JOptionPane.showMessageDialog(this, "Evento registrado exitosamente", "Éxito",
                         JOptionPane.INFORMATION_MESSAGE);
-                // * Limpiar los campos del formulario */
-                txtCodigoEvento.setText("");
-                txtFechaEvento.setText("");
-                comboTipoEvento.setSelectedIndex(0);
-                txtTitulo.setText("");
-                txtUbicacion.setText("");
-                spinnerCupoMax.setValue(1);
             } else {
-                JOptionPane.showMessageDialog(this, "Error al registrar el evento, Verifique los datos ingresados",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error al registrar el evento en la BD.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
-
         } else {
-            JOptionPane.showMessageDialog(this, "Error de validación", "Error",
-                    JOptionPane.ERROR_MESSAGE);
-
+            JOptionPane.showMessageDialog(this, validationMsg,
+                    "Error de validación", JOptionPane.ERROR_MESSAGE);
         }
 
     }
