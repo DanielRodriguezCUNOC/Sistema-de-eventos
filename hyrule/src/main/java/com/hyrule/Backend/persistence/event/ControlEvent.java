@@ -33,7 +33,7 @@ public class ControlEvent extends Control<EventModel> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null; // Placeholder return
+        return null;
     }
 
     @Override
