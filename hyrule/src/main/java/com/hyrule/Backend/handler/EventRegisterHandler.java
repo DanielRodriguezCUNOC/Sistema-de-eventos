@@ -66,6 +66,9 @@ public class EventRegisterHandler implements RegisterHandler {
             archiveCodes.add(codigo);
             archiveTitles.add(titulo + "_" + fecha);
 
+            logWriter.write("Evento registrado: " + evento);
+            logWriter.newLine();
+
             // * Insertamos el evento en la base de datos */
             return control.insert(evento) != null;
         } catch (Exception e) {

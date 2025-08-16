@@ -28,9 +28,10 @@ public class ParticipantRegisterForm extends JInternalFrame {
     public ParticipantRegisterForm(AdminModule adminView) {
         super("", true, true, true, true);
         this.adminView = adminView;
+        adminView.setTitle("Registro de Participantes");
 
         setLayout(new BorderLayout());
-        setSize(1000, 740);
+        setSize(1000, 750);
         initComponents();
 
         modificarVentana();
@@ -250,21 +251,21 @@ public class ParticipantRegisterForm extends JInternalFrame {
         ParticipantModel participante = new ParticipantModel(correo, nombre, tipoParticipante, institucion);
 
         ParticipantRegisterHandler handler = new ParticipantRegisterHandler();
-        if (handler.isValid(participante)) {
-            JOptionPane.showMessageDialog(this, "Participante registrado exitosamente.",
-                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
-            // *Limpiar los campos */
-            txtCorreo.setText("");
-            txtNombre.setText("");
-            txtInstitucion.setText("");
-            comboTipoParticipante.setSelectedIndex(0);
+        String validationMsg = handler.validateForm(participante);
 
+        if ("Ok".equals(validationMsg)) {
+            if (handler.insertFromForm(participante)) {
+                JOptionPane.showMessageDialog(this, "Participante registrado exitosamente.", "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al registrar el participante.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Error al registrar el participante. "
-                    + "Verifique los datos ingresados.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            JOptionPane.showMessageDialog(this, validationMsg, "Error de Validación", JOptionPane.WARNING_MESSAGE);
 
+        }
     }
 
 }

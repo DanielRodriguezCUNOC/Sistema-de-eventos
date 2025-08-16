@@ -128,12 +128,53 @@ public class AdminModule extends JFrame {
                 desktopPane.add(panelInicio);
             } else {
                 System.err.println("No se pudo cargar la imagen de fondo.");
+                crearPanelInicioSinImagen();
             }
         } catch (Exception e) {
             e.printStackTrace();
+            // *Si no se puede cargar la imagen */
+            crearPanelInicioSinImagen();
         }
         desktopPane.repaint();
         desktopPane.revalidate();
+    }
+
+    private void crearPanelInicioSinImagen() {
+        JPanel panelInicio = new JPanel();
+        panelInicio.setLayout(new BorderLayout());
+        panelInicio.setBackground(new Color(240, 242, 245));
+        panelInicio.setBounds(0, 0, desktopPane.getWidth(), desktopPane.getHeight());
+
+        JPanel panelCentral = new JPanel();
+        panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
+        panelCentral.setBackground(new Color(240, 242, 245));
+        panelCentral.setBorder(new EmptyBorder(100, 50, 100, 50));
+
+        JLabel titulo = new JLabel("🎉 Bienvenido al Sistema de Eventos");
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 32));
+        titulo.setForeground(new Color(33, 37, 41));
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel subtitulo = new JLabel("Gestiona eventos, participantes y actividades desde un solo lugar");
+        subtitulo.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        subtitulo.setForeground(new Color(108, 117, 125));
+        subtitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel instruccion = new JLabel("Utiliza el menú lateral para navegar entre las diferentes funciones");
+        instruccion.setFont(new Font("SansSerif", Font.ITALIC, 14));
+        instruccion.setForeground(new Color(134, 142, 150));
+        instruccion.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        panelCentral.add(Box.createVerticalGlue());
+        panelCentral.add(titulo);
+        panelCentral.add(Box.createVerticalStrut(20));
+        panelCentral.add(subtitulo);
+        panelCentral.add(Box.createVerticalStrut(30));
+        panelCentral.add(instruccion);
+        panelCentral.add(Box.createVerticalGlue());
+
+        panelInicio.add(panelCentral, BorderLayout.CENTER);
+        desktopPane.add(panelInicio);
     }
 
     private void mostrarEventRegisterModule() {
