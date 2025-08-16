@@ -1,6 +1,8 @@
 package com.hyrule.Backend.model.event;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class EventModel {
     private String codigoEvento;
@@ -9,25 +11,29 @@ public class EventModel {
     private String tituloEvento;
     private String ubicacionEvento;
     private Integer cupoMaxParticipantes;
+    private BigDecimal costoEvento;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public EventModel(String codigoEvento, LocalDate fechaEvento, EventType tipoEvento, String tituloEvento,
-            String ubicacionEvento, Integer cupoMaxParticipantes) {
+            String ubicacionEvento, Integer cupoMaxParticipantes, BigDecimal costoEvento) {
         this.codigoEvento = codigoEvento;
         this.fechaEvento = fechaEvento;
         this.tipoEvento = tipoEvento;
         this.tituloEvento = tituloEvento;
         this.ubicacionEvento = ubicacionEvento;
         this.cupoMaxParticipantes = cupoMaxParticipantes;
+        this.costoEvento = costoEvento;
     }
 
-    public EventModel(String codigoEvento, String fechaEvento, String tipoEvento, String tituloEvento,
-            String ubicacionEvento, Integer cupoMaxParticipantes) {
+    public EventModel(String codigoEvento, String fechaEventoStr, String tipoEvento, String tituloEvento,
+            String ubicacionEvento, Integer cupoMaxParticipantes, String costoEventoStr) {
         this.codigoEvento = codigoEvento;
-        this.fechaEvento = LocalDate.parse(fechaEvento);
+        this.fechaEvento = LocalDate.parse(fechaEventoStr, formatter);
         this.tipoEvento = EventType.valueOf(tipoEvento.toUpperCase());
         this.tituloEvento = tituloEvento;
         this.ubicacionEvento = ubicacionEvento;
         this.cupoMaxParticipantes = cupoMaxParticipantes;
+        this.costoEvento = new BigDecimal(costoEventoStr);
     }
 
     // * Getters y Setters */
@@ -79,6 +85,14 @@ public class EventModel {
         this.cupoMaxParticipantes = cupoMaxParticipantes;
     }
 
+    public BigDecimal getCostoEvento() {
+        return costoEvento;
+    }
+
+    public void setCostoEvento(BigDecimal costoEvento) {
+        this.costoEvento = costoEvento;
+    }
+
     // * Funcion toString para representar el evento como un String */
     @Override
     public String toString() {
@@ -89,6 +103,7 @@ public class EventModel {
                 ", tituloEvento='" + tituloEvento + '\'' +
                 ", ubicacionEvento='" + ubicacionEvento + '\'' +
                 ", cupoMaxParticipantes=" + cupoMaxParticipantes +
+                ", costoEvento=" + costoEvento +
                 '}';
     }
 
