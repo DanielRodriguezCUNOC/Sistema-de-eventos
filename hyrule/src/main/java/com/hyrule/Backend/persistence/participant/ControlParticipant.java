@@ -24,7 +24,7 @@ public class ControlParticipant extends Control<ParticipantModel> {
 
             pstmt.setString(1, entity.getCorreo_participante());
             pstmt.setString(2, entity.getNombre_completo());
-            pstmt.setString(3, entity.getTipo_participante().name());
+            pstmt.setString(3, entity.getTipoParticipante().name());
             pstmt.setString(4, entity.getInstitucion());
 
             int rowsAffected = pstmt.executeUpdate();

@@ -1,76 +1,61 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.hyrule.Backend.RegularExpresion.RExpresionEvento;
+import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.event.EventModel;
-import com.hyrule.Backend.model.event.EventType;
 import com.hyrule.Backend.persistence.event.ControlEvent;
 import com.hyrule.interfaces.RegisterHandler;
 
 public class EventRegisterHandler implements RegisterHandler {
 
-    // *Expresion regular para validar el registro de eventos */
-    private static final Pattern PATRON = Pattern.compile(
-            "^REGISTRO_EVENTO\\s*\\(\\s*\"(EVT-\\d{8})\"\\s*,\\s*\"(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})\"\\s*,"
-                    +
-                    "\\s*\"(CHARLA|CONGRESO|TALLER|DEBATE)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9\\-\\s]+)\"\\s*,\\s*\"([a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.,()\\-\\s]{1,150})\"\\s*,\\s*(\\d+)\\s*,\\s*(\\d+(\\.\\d{1,2})?)\\s*\\);$");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // * Creamos una instacia para ingresar los datos a la BD */
     private final ControlEvent control = new ControlEvent();
 
-    // *Creamos un almacenamiento interno para detectar eventos */
-    private final Set<String> archiveCodes = new HashSet<>();
-    private final Set<String> archiveTitles = new HashSet<>();
+    // *Estructura para almacenar los eventos */
+    ValidationArchive validator = ValidationArchive.getInstance();
 
     // *Metodo para procesar el registro de eventos desde el archivo */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
+
             // *Validamos la linea con la expresion regular */
-            Matcher m = PATRON.matcher(linea.trim());
-            if (!m.matches())
-                return false;
+            RExpresionEvento parser = new RExpresionEvento();
+            EventModel event = parser.parseEvent(linea.trim());
 
-            String codigo = m.group(1);
-            LocalDate fecha = LocalDate.parse(m.group(2) + "/" + m.group(3) + "/" + m.group(4), DATE_FORMAT);
-            EventType tipo = EventType.valueOf(m.group(5));
-            String titulo = m.group(6);
-            String ubicacion = m.group(7);
-            Integer cupo = Integer.parseInt(m.group(8));
-            BigDecimal costo = new BigDecimal(m.group(9));
-
-            // *Creamos una instancia de la tabla Evento */
-            EventModel evento = new EventModel(codigo, fecha, tipo, titulo, ubicacion, cupo, costo);
-
-            // *Verificamos duplicados */
-            if (archiveCodes.contains(codigo)) {
-                logWriter.write("Código de evento duplicado en el archivo: " + codigo);
+            if (event == null) {
+                logWriter.write("Línea inválida o incompleta: " + linea);
                 logWriter.newLine();
                 return false;
             }
-            if (archiveTitles.contains(titulo + "_" + fecha)) {
-                logWriter.write("Título de evento duplicado en el archivo: " + titulo);
+            if (validator.existsEvent(event.getCodigoEvento())) {
+                logWriter.write("El evento ya existe: " + event.getCodigoEvento());
+                logWriter.newLine();
+                return false;
+
+            }
+            if (validator.eventHaveSameTitleAndDate(event.getTituloEvento(), event.getFechaEvento())) {
+                logWriter.write("Ya existe un evento con el mismo título y fecha: " + event.getTituloEvento() + " - "
+                        + event.getFechaEvento().format(DATE_FORMAT));
                 logWriter.newLine();
                 return false;
             }
 
-            // *Agregamos los datos al HashSet */
-            archiveCodes.add(codigo);
-            archiveTitles.add(titulo + "_" + fecha);
+            // *Agregamos el evento a la estructura de validacion */
+            validator.addEvento(event);
 
-            logWriter.write("Evento registrado: " + evento);
+            logWriter.write("Evento registrado: " + event);
             logWriter.newLine();
 
             // * Insertamos el evento en la base de datos */
-            return control.insert(evento) != null;
+            return control.insert(event) != null;
+
         } catch (Exception e) {
             try {
                 logWriter.write("Excepción procesando REGISTRO_EVENTO: " + e.getMessage());

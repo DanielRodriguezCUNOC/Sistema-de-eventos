@@ -22,18 +22,19 @@ public class ControlAttendance extends Control<AttendanceModel> {
     @Override
     public AttendanceModel insert(AttendanceModel entity) throws SQLException {
 
+        // *Generamos la query*/
+        String query = "INSERT INTO asistencia (correo_participante, codigo_actividad) VALUES (?, ?)";
+
         try (Connection conn = dbConnection.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
 
-            if (existsAttendance(conn, entity)) {
-                return null; // Ya existe
-            }
+            pstmt.setString(1, entity.getCorreoParticipante());
 
-            if (!hasCapacity(conn, entity)) {
-                return null; // Cupo lleno
-            }
+            pstmt.setString(2, entity.getCodigoActividad());
 
-            return insertAttendance(conn, entity);
+            pstmt.executeUpdate();
         }
+        return entity;
 
     }
 
@@ -61,44 +62,50 @@ public class ControlAttendance extends Control<AttendanceModel> {
         throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
-    private boolean existsAttendance(Connection connection, AttendanceModel entity) throws SQLException {
+    // *Funcion para validar la actividad */
+    public String validateAttendance(AttendanceModel attendace) throws SQLException {
+        if (existsAttendance(attendace)) {
+            return "Este participante ya cuenta con asistencia en esta actividad.";
+        }
+        if (!hasCapacity(attendace.getCodigoActividad())) {
+            return "La actividad ha alcanzado su cupo máximo.";
+        }
+        return "Ok";
+    }
+
+    // * Verificamos si la asistencia ya existe */
+    private boolean existsAttendance(AttendanceModel entity) throws SQLException {
         String sql = "SELECT 1 FROM asistencia WHERE correo_participante = ? AND codigo_actividad = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, entity.getCorreoParticipante());
-            stmt.setString(2, entity.getCodigoActividad());
-            try (ResultSet rs = stmt.executeQuery()) {
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, entity.getCorreoParticipante());
+            pstmt.setString(2, entity.getCodigoActividad());
+            try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next();
             }
         }
     }
 
-    private boolean hasCapacity(Connection connection, AttendanceModel entity) throws SQLException {
+    // * Verificamos si la actividad tiene cupo */
+    private boolean hasCapacity(String codigoActividad) throws SQLException {
+
         String sql = "SELECT COUNT(*) as current_attendance, a.cupo_maximo " +
                 "FROM asistencia a " +
                 "JOIN actividad ac ON a.codigo_actividad = ac.codigo_actividad " +
                 "WHERE a.codigo_actividad = ? " +
                 "GROUP BY a.codigo_actividad";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, entity.getCodigoActividad());
-            try (ResultSet rs = stmt.executeQuery()) {
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, codigoActividad);
+            try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int current = rs.getInt("current_attendance");
                     int max = rs.getInt("cupo_maximo");
                     return current < max;
                 } else {
-                    return true; // No hay registros, entonces hay cupo
+                    return true;
                 }
             }
-        }
-    }
-
-    private AttendanceModel insertAttendance(Connection connection, AttendanceModel entity) throws SQLException {
-        String sql = "INSERT INTO asistencia (correo_participante, codigo_actividad) VALUES (?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, entity.getCorreoParticipante());
-            stmt.setString(2, entity.getCodigoActividad());
-            int affected = stmt.executeUpdate();
-            return affected == 1 ? entity : null;
         }
     }
 

@@ -8,32 +8,33 @@ public class ActivityModel {
     private String codigoActividad;
     private String codigoEvento;
     private ActivityType tipoActividad;
-    private String descripcion;
+    private String tituloActividad;
     private String correo;
     private LocalTime horaInicio;
     private LocalTime horaFin;
-    private int cupoMaximo;
+    private Integer cupoMaximo;
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
-    public ActivityModel(String codigoActividad, String codigoEvento, ActivityType tipoActividad, String descripcion,
-            String correo, LocalTime horaInicio, LocalTime horaFin, int cupoMaximo) {
+    public ActivityModel(String codigoActividad, String codigoEvento, ActivityType tipoActividad,
+            String tituloActividad,
+            String correo, LocalTime horaInicio, LocalTime horaFin, Integer cupoMaximo) {
         this.codigoActividad = codigoActividad;
         this.codigoEvento = codigoEvento;
         this.tipoActividad = tipoActividad;
-        this.descripcion = descripcion;
+        this.tituloActividad = tituloActividad;
         this.correo = correo;
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
         this.cupoMaximo = cupoMaximo;
     }
 
-    public ActivityModel(String codigoActividad, String codigoEvento, String tipoActividadStr, String descripcion,
+    public ActivityModel(String codigoActividad, String codigoEvento, String tipoActividadStr, String tituloActividad,
             String correo, String horaInicio, String horaFin, int cupoMaximo) {
 
         this.codigoActividad = codigoActividad;
         this.codigoEvento = codigoEvento;
         this.tipoActividad = ActivityType.valueOf(tipoActividadStr);
-        this.descripcion = descripcion;
+        this.tituloActividad = tituloActividad;
         this.correo = correo;
         this.horaInicio = LocalTime.parse(horaInicio, TIME_FORMAT);
         this.horaFin = LocalTime.parse(horaFin, TIME_FORMAT);
@@ -53,8 +54,8 @@ public class ActivityModel {
         return tipoActividad;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getTituloActividad() {
+        return tituloActividad;
     }
 
     public String getCorreo() {
@@ -69,7 +70,7 @@ public class ActivityModel {
         return horaFin;
     }
 
-    public int getCupoMaximo() {
+    public Integer getCupoMaximo() {
         return cupoMaximo;
     }
 
@@ -86,8 +87,8 @@ public class ActivityModel {
 
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setTituloActividad(String tituloActividad) {
+        this.tituloActividad = tituloActividad;
     }
 
     public void setCorreo(String correo) {
@@ -112,7 +113,7 @@ public class ActivityModel {
                 "codigoActividad='" + codigoActividad + '\'' +
                 ", codigoEvento='" + codigoEvento + '\'' +
                 ", tipoActividad='" + tipoActividad + '\'' +
-                ", descripcion='" + descripcion + '\'' +
+                ", tituloActividad='" + tituloActividad + '\'' +
                 ", correo='" + correo + '\'' +
                 ", horaInicio=" + horaInicio +
                 ", horaFin=" + horaFin +

@@ -121,7 +121,7 @@ public class EventRegisterForm extends JInternalFrame {
         gbc.insets = new Insets(15, 15, 15, 15);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        txtCodigoEvento = createStyledTextField("EVT-XXX");
+        txtCodigoEvento = createStyledTextField("EVT-00000001");
         txtFechaEvento = createStyledTextField("DD/MM/YYYY");
         txtTitulo = createStyledTextField("Título del Evento");
         txtUbicacion = createStyledTextField("Ubicación del Evento");
@@ -303,7 +303,7 @@ public class EventRegisterForm extends JInternalFrame {
                     cancelEventAction();
                     break;
                 case "REGRESAR":
-                    backModuleAction();
+                    adminView.cerrarVentanas();
                     break;
                 default:
                     break;
@@ -336,10 +336,6 @@ public class EventRegisterForm extends JInternalFrame {
                 "Formulario cancelado y campos limpiados.",
                 "Cancelado",
                 JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void backModuleAction() {
-        adminView.cerrarVentanas();
     }
 
 }
