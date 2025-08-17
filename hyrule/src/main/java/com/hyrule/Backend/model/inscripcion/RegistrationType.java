@@ -8,6 +8,6 @@ public enum RegistrationType {
 
     @Override
     public String toString() {
-        return name().toLowerCase();
+        return name().toUpperCase();
     }
 }

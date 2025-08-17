@@ -1,41 +1,48 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.sql.SQLException;
 
+import com.hyrule.Backend.RegularExpresion.RExpresionAsistencia;
+import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.asistencia.AttendanceModel;
 import com.hyrule.Backend.persistence.asistencia.ControlAttendance;
 import com.hyrule.interfaces.RegisterHandler;
 
 public class AttendanceRegisterHandler implements RegisterHandler {
 
-    // *Expresion regular */
-    private static final Pattern Patron = Pattern.compile(
-            "^ASISTENCIA\\(\"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})\"\\s*,\\s*\"(ACT-\\d{8})\"\\);$");
-
     public static final ControlAttendance control = new ControlAttendance();
+
+    // *Estructura para validacion de asistencia */
+    ValidationArchive validator = ValidationArchive.getInstance();
 
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
-            Matcher m = Patron.matcher(linea.trim());
-            if (!m.matches())
-                return false;
 
-            String correo = m.group(1);
-            String codigoEvento = m.group(2);
-
-            AttendanceModel attendance = new AttendanceModel(codigoEvento, correo);
-
-            if (control.insert(attendance) != null) {
-                return true;
-            } else {
-                logWriter.write(
-                        "No se pudo registrar la asistencia para el correo: " + correo + " y evento: " + codigoEvento);
+            // *Validamos la linea con la expresion regular */
+            RExpresionAsistencia parser = new RExpresionAsistencia();
+            AttendanceModel attendance = parser.parseAttendance(linea.trim());
+            if (attendance == null) {
+                logWriter.write("Línea inválida o incompleta: " + linea);
                 logWriter.newLine();
                 return false;
             }
+
+            // *Validamos si la asistencia ya existe */
+            if (validator.existsAttendance(attendance.getCorreoParticipante(), attendance.getCodigoActividad())) {
+                logWriter.write("La asistencia ya existe para el participante: " + attendance.getCorreoParticipante()
+                        + " en la actividad: " + attendance.getCodigoActividad());
+                logWriter.newLine();
+                return false;
+            }
+
+            // *Agregamos los datos al HashSet */
+            validator.addAsistencia(attendance);
+
+            // * Insertamos la asistencia en la base de datos */
+            return control.insert(attendance) != null;
+
         } catch (Exception e) {
             try {
                 logWriter.write("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
@@ -46,39 +53,52 @@ public class AttendanceRegisterHandler implements RegisterHandler {
         }
     }
 
-    public boolean isValid(AttendanceModel attendance) {
+    public boolean insertFromForm(AttendanceModel attendance) {
+
+        // * Insertamos la asistencia en la base de datos */
         try {
-            if (attendance == null) {
-                return false;
+            return control.insert(attendance) != null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+
+    }
+
+    public String validateForm(AttendanceModel attendance) {
+
+        if (attendance == null) {
+            return "La asistencia no puede ser nula.";
+        }
+
+        if (!validateDataIntegrity(attendance)) {
+            return "Datos de asistencia inválidos.";
+        }
+
+        try {
+            String validation = control.validateAttendance(attendance);
+
+            if (!"Ok".equals(validation)) {
+                return validation;
+
             }
-
-            if (!validateDataIntegrity(attendance)) {
-                return false;
-            }
-
-            // *Validamos que no exista duplicado o el cupo esta lleno*/
-
-            if (control.insert(attendance) != null)
-                return true;
-
-            return false;
-
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+
+        return "Ok";
 
     }
 
     private boolean validateDataIntegrity(AttendanceModel attendance) {
-        return attendance != null &&
-                attendance.getCodigoActividad() != null &&
-                !attendance.getCodigoActividad().isEmpty() &&
-                attendance.getCorreoParticipante() != null &&
-                !attendance.getCorreoParticipante().isEmpty()
-                && Pattern.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-                        attendance.getCorreoParticipante())
-                && Pattern.matches("^ACT-\\d{8}$", attendance.getCodigoActividad());
+
+        boolean correoValido = attendance.getCorreoParticipante() != null &&
+                attendance.getCorreoParticipante().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+
+        boolean codigoValido = attendance.getCodigoActividad() != null &&
+                attendance.getCodigoActividad().matches("^ACT-\\d{8}$");
+
+        return correoValido && codigoValido;
     }
 
 }

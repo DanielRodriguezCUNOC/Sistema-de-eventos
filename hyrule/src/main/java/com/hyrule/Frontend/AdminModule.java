@@ -22,7 +22,7 @@ public class AdminModule extends JFrame {
     private JPanel sidebar;
 
     public AdminModule() {
-        setTitle("Módulo Administrador - Dashboard");
+        setTitle("Sistema de Administración de Eventos");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
@@ -253,7 +253,7 @@ public class AdminModule extends JFrame {
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
             frame.dispose();
         }
-        // desktopPane.removeAll();
+        setTitle("Sistema de Administración de Eventos");
         desktopPane.repaint();
     }
 

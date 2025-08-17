@@ -1,40 +1,45 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.hyrule.Backend.RegularExpresion.RExpresionCertificado;
+import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.certified.CertifiedModel;
 import com.hyrule.Backend.persistence.certified.ControlCertified;
 import com.hyrule.interfaces.RegisterHandler;
 
 public class CertifiedRegisterHandler implements RegisterHandler {
-    // *Expresion regular */
-    private static final Pattern Patron = Pattern.compile(
-            "^CERTIFICADO\\s*\\(\\s*\"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})\"\\s*,\\s*\"(EVT-\\d{8})\"\\s*\\);$");
 
     public static final ControlCertified control = new ControlCertified();
+
+    // *Estructura para almacenar datos */
+    ValidationArchive validator = ValidationArchive.getInstance();
 
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
-            Matcher m = Patron.matcher(linea.trim());
-            if (!m.matches())
-                return false;
 
-            String correo = m.group(1);
-            String codigoEvento = m.group(2);
-
-            CertifiedModel certified = new CertifiedModel(codigoEvento, correo);
-
-            if (control.insert(certified) != null) {
-                return true;
-            } else {
-                logWriter.write(
-                        "No se pudo registrar el certificado para el correo: " + correo + " y evento: " + codigoEvento);
+            RExpresionCertificado parser = new RExpresionCertificado();
+            CertifiedModel certified = parser.parseCertified(linea.trim());
+            if (certified == null) {
+                logWriter.write("Línea inválida o incompleta: " + linea);
                 logWriter.newLine();
                 return false;
             }
+
+            // *Validamos si el certificado ya existe */
+            if (validator.existsCertificado(certified.getCorreoParticipante(), certified.getCodigoEvento())) {
+                logWriter.write("El certificado ya existe para el participante: " + certified.getCorreoParticipante()
+                        + " en el evento: " + certified.getCodigoEvento());
+                logWriter.newLine();
+                return false;
+            }
+
+            // *Agregamos los datos al HashSet */
+            validator.addCertificado(certified);
+
+            // * Insertamos el certificado en la base de datos */
+            return control.insert(certified) != null;
+
         } catch (Exception e) {
             try {
                 logWriter.write("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
@@ -70,14 +75,15 @@ public class CertifiedRegisterHandler implements RegisterHandler {
     }
 
     private boolean validateDataIntegrity(CertifiedModel certified) {
-        return certified != null &&
-                certified.getCodigoEvento() != null &&
-                !certified.getCodigoEvento().isBlank() &&
-                certified.getCorreoParticipante() != null &&
-                !certified.getCorreoParticipante().isBlank()
-                && Pattern.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-                        certified.getCorreoParticipante())
-                && Pattern.matches("^EVT-\\d{8}$", certified.getCodigoEvento());
+
+        boolean codigoEventoValido = certified.getCodigoEvento() != null &&
+                certified.getCodigoEvento().matches("^EVT-\\d{8}$") && !certified.getCodigoEvento().isBlank();
+
+        boolean correoValido = certified.getCorreoParticipante() != null &&
+                certified.getCorreoParticipante().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+                && !certified.getCorreoParticipante().isBlank();
+
+        return codigoEventoValido && correoValido;
     }
 
 }

@@ -2,11 +2,16 @@ package com.hyrule.Frontend.activity;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import com.hyrule.Backend.handler.ActivityRegisterHandler;
 import com.hyrule.Backend.model.activity.ActivityModel;
+import com.hyrule.Backend.model.activity.ActivityType;
 import com.hyrule.Frontend.AdminModule;
 
 import javax.swing.border.TitledBorder;
@@ -29,9 +34,10 @@ public class ActivityRegisterForm extends JInternalFrame {
     public ActivityRegisterForm(AdminModule adminView) {
         super("", true, true, true, true);
         this.adminView = adminView;
+        adminView.setTitle("Registro de Actividades");
 
         setLayout(new BorderLayout());
-        setSize(1000, 740);
+        setSize(1000, 750);
         initComponents();
         modificarVentana();
     }
@@ -116,7 +122,7 @@ public class ActivityRegisterForm extends JInternalFrame {
         };
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(100, 149, 237), 2, true),
-                "Registro de Actividad",
+                "",
                 TitledBorder.CENTER,
                 TitledBorder.TOP,
                 new Font("Segoe UI", Font.BOLD, 18),
@@ -134,8 +140,8 @@ public class ActivityRegisterForm extends JInternalFrame {
         comboTipoActividad.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtTitulo = createStyledTextField("Taller de pociones");
         txtCorreoPonente = createStyledTextField("Correo del Ponente");
-        txtHoraInicio = createStyledTextField("10:00)");
-        txtHoraFin = createStyledTextField("12:00");
+        txtHoraInicio = createStyledTextField("10:00");
+        txtHoraFin = createStyledTextField("12:30");
 
         spinnerCupoMaximo = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
         spinnerCupoMaximo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -145,7 +151,7 @@ public class ActivityRegisterForm extends JInternalFrame {
 
         btnRegistrar = createModernButton("Registrar", new Color(100, 149, 237));
         btnCancelar = createModernButton("Cancelar", new Color(220, 53, 69));
-        btnRegresar = createModernButton("Regresar", new Color(108, 117, 125));
+        btnRegresar = createModernButton("⬅️ Regresar", new Color(252, 141, 18));
 
         configurarAccionesBotones();
 
@@ -242,19 +248,43 @@ public class ActivityRegisterForm extends JInternalFrame {
         String horaFin = txtHoraFin.getText().trim();
         int cupoMaximo = (Integer) spinnerCupoMaximo.getValue();
 
-        ActivityModel actividad = new ActivityModel(codigoActividad, codigoEvento, tipoActividad, titulo, correoPonente,
-                horaInicio, horaFin, cupoMaximo);
+        ActivityModel actividad = null;
 
-        ActivityRegisterHandler handler = new ActivityRegisterHandler();
-        if (!handler.isValid(actividad)) {
-            JOptionPane.showMessageDialog(this, "Error al registrar la actividad. Verifique los datos ingresados.",
-                    "Error",
+        try {
+            // *Formato de hora */
+
+            DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+            LocalTime inicio = LocalTime.parse(horaInicio, TIME_FORMAT);
+            LocalTime fin = LocalTime.parse(horaFin, TIME_FORMAT);
+
+            ActivityType tipoActividadEnum = ActivityType.valueOf(tipoActividad.toUpperCase());
+            actividad = new ActivityModel(codigoActividad, codigoEvento, tipoActividadEnum, titulo,
+                    correoPonente, inicio, fin, cupoMaximo);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Error en el formato de hora. Use HH:mm.", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Tipo de actividad inválido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
+        ActivityRegisterHandler validator = new ActivityRegisterHandler();
+
+        String validationMsg = validator.validateForm(actividad);
+
+        if ("Ok".equals(validationMsg)) {
+            if (validator.insertFromForm(actividad)) {
+                JOptionPane.showMessageDialog(this, "Actividad registrada exitosamente.", "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al registrar la actividad.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+
+            }
+            return;
         } else {
-            JOptionPane.showMessageDialog(this, "Actividad registrada exitosamente.", "Éxito",
-                    JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, validationMsg, "Error de Validación", JOptionPane.WARNING_MESSAGE);
         }
 
     }

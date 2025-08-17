@@ -32,7 +32,7 @@ public class ParticipantModel {
         return nombre_completo;
     }
 
-    public ParticipantType getTipo_participante() {
+    public ParticipantType getTipoParticipante() {
         return tipo_participante;
     }
 
@@ -48,7 +48,7 @@ public class ParticipantModel {
         this.nombre_completo = nombre_completo;
     }
 
-    public void setTipo_participante(ParticipantType tipo_participante) {
+    public void setTipoParticipante(ParticipantType tipo_participante) {
         this.tipo_participante = tipo_participante;
     }
 
