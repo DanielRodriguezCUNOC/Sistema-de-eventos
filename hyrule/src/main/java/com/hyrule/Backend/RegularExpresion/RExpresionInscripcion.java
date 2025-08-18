@@ -1,18 +1,31 @@
 package com.hyrule.Backend.RegularExpresion;
 
+import java.util.regex.Pattern;
+
 import com.hyrule.Backend.model.inscripcion.RegistrationModel;
 import com.hyrule.Backend.model.inscripcion.RegistrationType;
 
+/**
+ * Clase para parsear líneas de inscripciones usando expresiones regulares.
+ * Extrae y valida datos de inscripciones desde texto en formato específico.
+ */
 public class RExpresionInscripcion {
 
-    // *Expresion regular para validar el correo */
-    public static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    /** Expresión regular para validar el correo electrónico */
+    public static final Pattern EMAIL = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
-    // *Expresion regular para validar el codigo de evento */
-    public static final String CODIGO_EVENTO = "^EVT-\\d{8}$";
+    /** Expresión regular para validar el código de evento */
+    public static final Pattern CODIGO_EVENTO = Pattern.compile("^EVT-\\d{8}$");
 
-    // *Funcion para validar el tipo de inscripcion */
+    /**
+     * Parsea una línea de texto para extraer datos de inscripción.
+     * 
+     * @param linea línea en formato REGISTRO_INSCRIPCION(...) con datos de
+     *              inscripción
+     * @return RegistrationModel con los datos parseados o null si es inválida
+     */
     public RegistrationModel parseRegistration(String linea) {
+
         if (!linea.startsWith("REGISTRO_INSCRIPCION") || !linea.endsWith(");")) {
             return null;
         }
@@ -36,9 +49,9 @@ public class RExpresionInscripcion {
         for (String parte : partes) {
             String valor = parte.replaceAll("^\"|\"$", "").trim();
 
-            if (valor.matches(EMAIL)) {
+            if (EMAIL.matcher(valor).matches()) {
                 correo = valor;
-            } else if (valor.matches(CODIGO_EVENTO)) {
+            } else if (CODIGO_EVENTO.matcher(valor).matches()) {
                 codigoEvento = valor;
             } else if (isRegistrationType(codigoEvento)) {
                 tipoInscripcion = RegistrationType.valueOf(codigoEvento);
@@ -54,7 +67,12 @@ public class RExpresionInscripcion {
         return null;
     }
 
-    // *Metodo para convertir el tipo de inscripcion */
+    /**
+     * Verifica si una cadena corresponde a un tipo de inscripción válido.
+     * 
+     * @param registrationType la cadena a verificar
+     * @return true si es un tipo válido, false si no
+     */
     private boolean isRegistrationType(String registrationType) {
         for (RegistrationType type : RegistrationType.values()) {
             if (type.name().equals(registrationType)) {
@@ -64,6 +82,12 @@ public class RExpresionInscripcion {
         return false;
     }
 
+    /**
+     * Divide los argumentos de entrada por comas respetando las comillas.
+     * 
+     * @param input la cadena de argumentos a dividir
+     * @return array de argumentos separados
+     */
     private String[] splitArgs(String input) {
         // *Divide los argumentos por comas*/
         return input.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);

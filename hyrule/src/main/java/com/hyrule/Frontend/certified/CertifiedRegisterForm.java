@@ -202,27 +202,32 @@ public class CertifiedRegisterForm extends JInternalFrame {
     }
 
     private void registrarAsistencia() {
-        try {
-            CertifiedModel attendance = new CertifiedModel(
-                    txtCorreo.getText().trim(),
-                    txtCodigoEvento.getText().trim());
-            CertifiedRegisterHandler handler = new CertifiedRegisterHandler();
-            if (!handler.isValid(attendance)) {
+
+        String correo = txtCorreo.getText().trim();
+        String codigoEvento = txtCodigoEvento.getText().trim();
+
+        CertifiedModel certified = new CertifiedModel(correo, codigoEvento);
+
+        CertifiedRegisterHandler validator = new CertifiedRegisterHandler();
+
+        String validationMsg = validator.validateForm(certified);
+        if (!"Ok".equals(validationMsg)) {
+            if (validator.insertFromForm(certified)) {
                 JOptionPane.showMessageDialog(this,
-                        "Error en el registro de evento.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+                        "Certificado registrado correctamente.",
+                        "Registro Exitoso",
+                        JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
-                        "Evento registrado exitosamente.",
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                limpiarCampos();
+                        "Error al registrar el certificado.",
+                        "Error de Registro",
+                        JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception e) {
+        } else {
             JOptionPane.showMessageDialog(this,
-                    "Ocurrió un error al registrar el evento: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                    validationMsg,
+                    "Error de Validación",
+                    JOptionPane.WARNING_MESSAGE);
         }
-
     }
 }

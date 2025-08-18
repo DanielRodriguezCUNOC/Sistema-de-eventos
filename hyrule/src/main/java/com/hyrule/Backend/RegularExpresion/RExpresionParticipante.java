@@ -1,20 +1,32 @@
 package com.hyrule.Backend.RegularExpresion;
 
+import java.util.regex.Pattern;
+
 import com.hyrule.Backend.model.participant.ParticipantModel;
 import com.hyrule.Backend.model.participant.ParticipantType;
 
+/**
+ * Clase para parsear líneas de participantes usando expresiones regulares.
+ * Extrae y valida datos de participantes desde texto en formato específico.
+ */
 public class RExpresionParticipante {
 
-    // *Expresion regular para validar el correo */
-    public static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    /** Expresión regular para validar el correo electrónico */
+    public static final Pattern EMAIL = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
-    // *Expresion regular para validar el nombre completo */
-    public static final String NOMBRE_COMPLETO = "^[a-zA-ZÁÉÍÓÚáéíóúÑñ\\s]{1,45}$";
+    /** Expresión regular para validar el nombre completo */
+    public static final Pattern NOMBRE_COMPLETO = Pattern.compile("^[a-zA-ZÁÉÍÓÚáéíóúÑñ\\s]{1,45}$");
 
-    // *Expresion regular para validar la institucion */
-    public static final String INSTITUCION = "^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.\\-]{1,150}$";
+    /** Expresión regular para validar la institución */
+    public static final Pattern INSTITUCION = Pattern.compile("^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.\\-]{1,150}$");
 
-    // *Funcion para validar los datos sin importar el orden */
+    /**
+     * Parsea una línea de texto para extraer datos de participante.
+     * 
+     * @param linea línea en formato REGISTRO_PARTICIPANTE(...) con datos del
+     *              participante
+     * @return ParticipantModel con los datos parseados o null si es inválida
+     */
     public ParticipantModel parseParticipant(String linea) {
         if (!linea.startsWith("REGISTRO_PARTICIPANTE") || !linea.endsWith(");")) {
             return null;
@@ -43,11 +55,11 @@ public class RExpresionParticipante {
             // *Eliminamos las comillas */
             String valor = parte.replaceAll("^\"|\"$", "").trim();
 
-            if (valor.matches(EMAIL)) {
+            if (EMAIL.matcher(valor).matches()) {
                 correo = valor;
-            } else if (valor.matches(NOMBRE_COMPLETO)) {
+            } else if (NOMBRE_COMPLETO.matcher(valor).matches()) {
                 nombre = valor;
-            } else if (valor.matches(INSTITUCION)) {
+            } else if (INSTITUCION.matcher(valor).matches()) {
                 institucion = valor;
             } else if (isParticipantType(valor)) {
                 tipoParticipante = ParticipantType.valueOf(valor);
@@ -63,7 +75,12 @@ public class RExpresionParticipante {
 
     }
 
-    // *Metodo para convertir el tipo de evento */
+    /**
+     * Verifica si una cadena corresponde a un tipo de participante válido.
+     * 
+     * @param participantType la cadena a verificar
+     * @return true si es un tipo válido, false si no
+     */
     private boolean isParticipantType(String participantType) {
         for (ParticipantType type : ParticipantType.values()) {
             if (type.name().equals(participantType)) {
@@ -73,6 +90,12 @@ public class RExpresionParticipante {
         return false;
     }
 
+    /**
+     * Divide los argumentos de entrada por comas respetando las comillas.
+     * 
+     * @param input la cadena de argumentos a dividir
+     * @return array de argumentos separados
+     */
     private String[] splitArgs(String input) {
         // *Divide los argumentos por comas*/
         return input.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);

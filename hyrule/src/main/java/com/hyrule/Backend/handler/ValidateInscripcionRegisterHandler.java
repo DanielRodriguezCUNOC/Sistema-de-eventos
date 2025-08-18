@@ -1,46 +1,105 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
-import java.util.regex.Matcher;
+import java.sql.SQLException;
 import java.util.regex.Pattern;
 
+import com.hyrule.Backend.RegularExpresion.RExpresionValidarInscripcion;
+import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.validate_registration.ValidateRegistrationModel;
 import com.hyrule.Backend.persistence.validate_registration.ControlValidateRegistration;
-import com.hyrule.Backend.records.PaymentRegistry;
 import com.hyrule.interfaces.RegisterHandler;
 
+/**
+ * Manejador para el procesamiento y validación de inscripciones de
+ * participantes en eventos.
+ * 
+ * Esta clase se encarga de procesar las líneas de validación de inscripciones
+ * desde archivos,
+ * validar que los participantes estén correctamente inscritos y hayan realizado
+ * los pagos
+ * correspondientes antes de confirmar su inscripción en el evento.
+ * 
+ * @author Paboomi
+ * @version 1.0
+ * @since 2025
+ */
 public class ValidateInscripcionRegisterHandler implements RegisterHandler {
 
-    // *Expresion regular */
-
-    private static final Pattern Patron = Pattern
-            .compile(
-                    "^VALIDAR_INSCRIPCION\\s*(\\s*\"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})\"\\s*,\\s*\"(EVT-\\d{8})\"\\s*\\);$");
-
+    /**
+     * Controlador para las operaciones de persistencia de validaciones de
+     * inscripción.
+     */
     public static final ControlValidateRegistration control = new ControlValidateRegistration();
 
+    /**
+     * Instancia del validador de archivos para verificar la integridad de los
+     * datos.
+     */
+    ValidationArchive validator = ValidationArchive.getInstance();
+
+    /**
+     * Procesa una línea de texto que contiene información de validación de
+     * inscripción.
+     * 
+     * Este método analiza la línea utilizando expresiones regulares, valida que el
+     * participante
+     * esté inscrito en el evento, que haya realizado el pago correspondiente, y que
+     * no exista
+     * una validación duplicada antes de procesar la inscripción.
+     * 
+     * @param linea     El texto de la línea a procesar que contiene los datos de
+     *                  validación
+     * @param logWriter El escritor para registrar logs del proceso de validación
+     * @return true si la validación se procesó exitosamente, false en caso
+     *         contrario
+     * @throws Exception Si ocurre un error durante el procesamiento
+     */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
-            Matcher m = Patron.matcher(linea.trim());
-            if (!m.matches())
-                return false;
-            String correo = m.group(1);
-            String codigoEvento = m.group(2);
 
-            // *Validamos que exista un pago registrado para el correo y evento */
-            if (!PaymentRegistry.existePago(correo, codigoEvento)) {
-                try {
-                    logWriter.write(
-                            "No existe pago registrado para el correo: " + correo + " y evento: " + codigoEvento);
-                    logWriter.newLine();
-                } catch (Exception ignore) {
-                }
+            // *Validamos usando expresion regular */
+
+            RExpresionValidarInscripcion parser = new RExpresionValidarInscripcion();
+            ValidateRegistrationModel inscripcion = parser.parseValidateRegistration(linea.trim());
+
+            if (inscripcion == null) {
+                logWriter.write("Línea inválida o incompleta: " + linea);
+                logWriter.newLine();
                 return false;
             }
 
-            ValidateRegistrationModel inscripcion = new ValidateRegistrationModel(correo, codigoEvento);
+            if (!validator.existsRegistration(inscripcion.getCorreo(), inscripcion.getCodigoEvento())) {
+                logWriter.write("El participante " + inscripcion.getCorreo() + " no está inscrito en el evento: "
+                        + inscripcion.getCodigoEvento());
+                logWriter.newLine();
+                return false;
+            }
 
+            if (!validator.existsPayment(inscripcion.getCorreo(), inscripcion.getCodigoEvento())) {
+                logWriter.write(
+                        "El participante " + inscripcion.getCorreo() + " no ha realizado el pago para el evento: "
+                                + inscripcion.getCodigoEvento());
+                logWriter.newLine();
+                return false;
+
+            }
+
+            if (validator.existsValidateRegistration(inscripcion)) {
+                logWriter.write("La validación de inscripción ya existe: " + inscripcion.getCorreo() + " - "
+                        + inscripcion.getCodigoEvento());
+                logWriter.newLine();
+                return false;
+
+            }
+
+            // *Agregamos la validacion a la estructura de validacion */
+            validator.addValidarInscripcion(inscripcion);
+            logWriter.write("Validación de inscripción registrada: " + inscripcion);
+            logWriter.newLine();
+
+            // * Insertamos la validación en la base de datos */
             return control.insert(inscripcion) != null;
 
         } catch (Exception e) {
@@ -53,38 +112,82 @@ public class ValidateInscripcionRegisterHandler implements RegisterHandler {
         }
     }
 
-    public boolean isValid(ValidateRegistrationModel validarInscripcion) {
+    /**
+     * Inserta una validación de inscripción directamente desde un formulario.
+     * 
+     * Este método se utiliza cuando los datos provienen de la interfaz de usuario
+     * en lugar de un archivo de procesamiento por lotes.
+     * 
+     * @param validarInscripcion El modelo de validación de inscripción a insertar
+     * @return true si la inserción fue exitosa, false en caso contrario
+     */
+    public boolean insertFromForm(ValidateRegistrationModel validarInscripcion) {
         try {
-            if (validarInscripcion == null) {
-                return false;
-            }
-
-            // *Validamos la integridad de los datos */
-            if (!validateDataIntegrity(validarInscripcion)) {
-                return false;
-            }
-
-            // *Validamos que exista un pago registrado para el correo y evento */
-            if (!PaymentRegistry.existePago(validarInscripcion.getCorreo(), validarInscripcion.getCodigoEvento())) {
-                return false;
-            }
-
             return control.insert(validarInscripcion) != null;
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
+    }
+
+    /**
+     * Valida los datos de una validación de inscripción desde un formulario.
+     * 
+     * Realiza validaciones completas incluyendo la integridad de los datos,
+     * verificaciones de negocio y validaciones específicas del controlador.
+     * 
+     * @param validarInscripcion El modelo de validación de inscripción a validar
+     * @return "Ok" si todas las validaciones pasan, mensaje de error específico en
+     *         caso contrario
+     */
+    public String validateForm(ValidateRegistrationModel validarInscripcion) {
+
+        if (validarInscripcion == null) {
+            return "Los datos de la inscripción no pueden ser nulos.";
+        }
+        if (!validateDataIntegrity(validarInscripcion)) {
+            return "Datos invalidos";
+        }
+
+        String validation = control.validateRegistration(validarInscripcion);
+        if (!"Ok".equals(validation)) {
+            return validation;
+        }
+
+        return "Ok";
 
     }
 
+    /**
+     * Valida la integridad de los datos de una validación de inscripción.
+     * 
+     * Verifica que los campos cumplan con los formatos y restricciones requeridas,
+     * incluyendo el formato del código de evento y la validez del correo
+     * electrónico.
+     * 
+     * @param validarInscripcion El modelo de validación de inscripción a validar
+     * @return true si todos los datos son válidos, false en caso contrario
+     * 
+     * @apiNote Los criterios de validación incluyen:
+     *          <ul>
+     *          <li>Código de evento con formato EVT-XXXXXXXX (8 dígitos)</li>
+     *          <li>Correo electrónico con formato válido</li>
+     *          <li>Campos no nulos y no vacíos</li>
+     *          </ul>
+     */
     public boolean validateDataIntegrity(ValidateRegistrationModel validarInscripcion) {
-        return validarInscripcion.getCorreo() != null
-                && !validarInscripcion.getCorreo().isBlank()
-                && validarInscripcion.getCodigoEvento() != null
-                && !validarInscripcion.getCodigoEvento().isBlank()
-                && Pattern.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", validarInscripcion.getCorreo())
-                && Pattern.matches("^EVT-\\d{8}$", validarInscripcion.getCodigoEvento());
+
+        boolean codigoValido = validarInscripcion.getCodigoEvento() != null &&
+                validarInscripcion.getCodigoEvento().matches("^EVT-\\d{8}$")
+                && validarInscripcion.getCodigoEvento() != null &&
+                !validarInscripcion.getCodigoEvento().isBlank();
+
+        boolean isValidEmail = Pattern.matches(
+                "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", validarInscripcion.getCorreo())
+                && validarInscripcion.getCorreo() != null && !validarInscripcion.getCorreo().isBlank();
+
+        return codigoValido && isValidEmail;
+
     }
 
 }

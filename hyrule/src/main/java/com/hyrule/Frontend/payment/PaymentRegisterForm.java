@@ -3,11 +3,14 @@ package com.hyrule.Frontend.payment;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
+import java.math.BigDecimal;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import com.hyrule.Backend.model.payment.PaymentModel;
+import com.hyrule.Backend.model.payment.PaymentType;
 import com.hyrule.Backend.handler.PaymentRegisterHandler;
 import com.hyrule.Frontend.AdminModule;
 
@@ -207,28 +210,41 @@ public class PaymentRegisterForm extends JInternalFrame {
     }
 
     private void registrarPago() {
+
+        String correo = txtCorreoParticipante.getText().trim();
+        String codigoEvento = txtCodigoEvento.getText().trim();
+        String metodoPago = comboMetodoPago.getSelectedItem().toString();
+        String montoStr = txtMonto.getText().trim();
+
+        PaymentModel pago = null;
+
         try {
+            BigDecimal monto = new BigDecimal(montoStr);
 
-            PaymentModel payment = new PaymentModel(
-                    txtCodigoEvento.getText().trim(),
-                    txtCorreoParticipante.getText().trim(),
-                    comboMetodoPago.getSelectedItem().toString(),
-                    txtMonto.getText().trim());
+            PaymentType tipoPago = PaymentType.valueOf(metodoPago.toUpperCase());
 
-            PaymentRegisterHandler paymentHandler = new PaymentRegisterHandler();
-            if (!paymentHandler.isValid(payment)) {
-                JOptionPane.showMessageDialog(this,
-                        "Error en el registro del pago.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Pago registrado exitosamente.\nMonto: " + payment.getMonto(),
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (NumberFormatException ex) {
+            pago = new PaymentModel(correo, codigoEvento, tipoPago, monto);
+
+        } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(this,
-                    "El monto debe ser un número decimal válido.",
+                    "Error al registrar el pago, verifique los datos ingresados.",
+                    "Error de validacion", JOptionPane.ERROR_MESSAGE);
+        }
+
+        PaymentRegisterHandler validator = new PaymentRegisterHandler();
+
+        String validationMsg = validator.validateForm(pago);
+        if (!"Ok".equals(validationMsg)) {
+            if (validator.insertFromForm(pago)) {
+                JOptionPane.showMessageDialog(this, "Pago registrado correctamente.", "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al registrar el pago: " + validationMsg,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al registrar el pago: " + validationMsg,
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

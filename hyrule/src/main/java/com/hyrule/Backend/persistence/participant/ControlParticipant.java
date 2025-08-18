@@ -11,16 +11,38 @@ import com.hyrule.Backend.connection.DBConnection;
 import com.hyrule.Backend.model.participant.ParticipantModel;
 import com.hyrule.Backend.persistence.Control;
 
+/**
+ * Controlador de persistencia para operaciones CRUD de participantes.
+ * Gestiona validaciones de duplicados y registro de participantes.
+ */
 public class ControlParticipant extends Control<ParticipantModel> {
 
+    /** Conexión a la base de datos */
+    private final DBConnection dbConnection;
+
+    /**
+     * Constructor que inicializa la conexión a la base de datos.
+     */
+    public ControlParticipant() {
+        this.dbConnection = new DBConnection();
+    }
+
+    /**
+     * Inserta un nuevo participante en la base de datos.
+     * 
+     * @param entity el participante a insertar
+     * @return el participante insertado o null si falla
+     */
     @Override
     public ParticipantModel insert(ParticipantModel entity) {
 
         // *Generamos la query*/
         String query = "INSERT INTO participante (correo_participante, nombre_completo, tipo_participante, institucion) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = new DBConnection().getConnection();
+        try (Connection conn = dbConnection.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            conn.setAutoCommit(false);
 
             pstmt.setString(1, entity.getCorreo_participante());
             pstmt.setString(2, entity.getNombre_completo());
@@ -29,7 +51,12 @@ public class ControlParticipant extends Control<ParticipantModel> {
 
             int rowsAffected = pstmt.executeUpdate();
 
-            return (rowsAffected > 0) ? entity : null;
+            if (rowsAffected == 0) {
+                conn.commit();
+                throw new SQLException("No se pudo insertar el participante, no se afectaron filas.");
+            }
+            conn.commit();
+            return entity;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -37,19 +64,41 @@ public class ControlParticipant extends Control<ParticipantModel> {
         return null;
     }
 
+    /**
+     * Actualiza un participante existente.
+     * 
+     * @param entity el participante con datos actualizados
+     */
     @Override
     public void update(ParticipantModel entity) {
     }
 
+    /**
+     * Elimina un participante por clave.
+     * 
+     * @param key la clave del participante a eliminar
+     */
     @Override
     public void delete(String key) {
     }
 
+    /**
+     * Busca un participante por clave.
+     * 
+     * @param key la clave de búsqueda
+     * @return el participante encontrado o null
+     */
     @Override
     public ParticipantModel findByKey(String key) {
         return null;
     }
 
+    /**
+     * Obtiene todos los participantes registrados.
+     * 
+     * @return lista de todos los participantes
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public List<ParticipantModel> findAll() throws SQLException {
 
@@ -57,7 +106,7 @@ public class ControlParticipant extends Control<ParticipantModel> {
 
         String query = "SELECT * FROM participante";
 
-        try (Connection conn = new DBConnection().getConnection();
+        try (Connection conn = dbConnection.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 ResultSet rs = pstmt.executeQuery()) {
 
@@ -79,8 +128,12 @@ public class ControlParticipant extends Control<ParticipantModel> {
         return participants;
     }
 
-    // *Metodo para validaciones */
-
+    /**
+     * Valida un participante verificando duplicados por correo y nombre.
+     * 
+     * @param participant el participante a validar
+     * @return "Ok" si es válido, mensaje de error si no
+     */
     public String validateParticipant(ParticipantModel participant) {
 
         if (emailExists(participant.getCorreo_participante())) {
@@ -93,7 +146,12 @@ public class ControlParticipant extends Control<ParticipantModel> {
 
     }
 
-    // *Verificamos que no hay correos duplicados */
+    /**
+     * Verifica si ya existe un participante con el correo especificado.
+     * 
+     * @param email el correo a verificar
+     * @return true si existe, false si no
+     */
     public boolean emailExists(String email) {
         try {
             for (ParticipantModel participant : findAll()) {
@@ -108,8 +166,12 @@ public class ControlParticipant extends Control<ParticipantModel> {
         }
     }
 
-    // *Verificamos que no hay dos correos con el mismo nombre de participante */
-
+    /**
+     * Verifica si ya existe un participante con el nombre especificado.
+     * 
+     * @param name el nombre a verificar
+     * @return true si existe, false si no
+     */
     public boolean nameExists(String name) {
         try {
             for (ParticipantModel participant : findAll()) {
