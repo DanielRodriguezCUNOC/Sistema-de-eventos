@@ -2,10 +2,13 @@ package com.hyrule.Frontend;
 
 import java.awt.*;
 import java.io.InputStream;
+import java.sql.Connection;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import com.hyrule.Backend.connection.DBConnection;
 import com.hyrule.Frontend.activity.ActivityRegisterForm;
 import com.hyrule.Frontend.attendance.AttendanceRegisterForm;
 import com.hyrule.Frontend.certified.CertifiedRegisterForm;
@@ -20,6 +23,8 @@ public class AdminModule extends JFrame {
 
     private JDesktopPane desktopPane;
     private JPanel sidebar;
+    private Connection connection;
+    private DBConnection dbConnection;
 
     public AdminModule() {
         setTitle("Sistema de Administración de Eventos");
@@ -28,6 +33,9 @@ public class AdminModule extends JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        dbConnection = new DBConnection();
+        this.connection = dbConnection.getConnection();
 
         sidebar = crearSidebar();
         add(sidebar, BorderLayout.WEST);
@@ -262,5 +270,9 @@ public class AdminModule extends JFrame {
         Dimension jInternalFrameSize = frame.getSize();
         frame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
                 (desktopSize.height - jInternalFrameSize.height) / 2);
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

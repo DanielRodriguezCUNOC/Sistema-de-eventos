@@ -100,7 +100,7 @@ public class CertifiedRegisterForm extends JInternalFrame {
                 BorderFactory.createEmptyBorder(20, 20, 20, 20),
                 BorderFactory.createTitledBorder(
                         BorderFactory.createLineBorder(new Color(100, 149, 237), 2, true),
-                        "Registro de Asistencia",
+                        "",
                         TitledBorder.CENTER,
                         TitledBorder.TOP,
                         new Font("SansSerif", Font.BOLD, 18),
@@ -208,7 +208,7 @@ public class CertifiedRegisterForm extends JInternalFrame {
 
         CertifiedModel certified = new CertifiedModel(correo, codigoEvento);
 
-        CertifiedRegisterHandler validator = new CertifiedRegisterHandler();
+        CertifiedRegisterHandler validator = new CertifiedRegisterHandler(adminView.getConnection());
 
         String validationMsg = validator.validateForm(certified);
         if (!"Ok".equals(validationMsg)) {
