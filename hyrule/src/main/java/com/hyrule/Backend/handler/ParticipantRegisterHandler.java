@@ -1,6 +1,8 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.regex.Pattern;
 
 import com.hyrule.Backend.RegularExpresion.RExpresionParticipante;
@@ -45,7 +47,19 @@ public class ParticipantRegisterHandler implements RegisterHandler {
      * Controlador para las operaciones de persistencia de participantes en la base
      * de datos.
      */
-    private final ControlParticipant control = new ControlParticipant();
+    private ControlParticipant control = new ControlParticipant();
+
+    /**
+     * Conexión a la base de datos.
+     */
+    private Connection conn;
+
+    /**
+     * Constructor que recibe la conexión a la base de datos.
+     */
+    public ParticipantRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * Instancia del validador de archivos para verificar duplicados y mantener
@@ -103,7 +117,7 @@ public class ParticipantRegisterHandler implements RegisterHandler {
             logWriter.newLine();
 
             // * Insertamos el participante en la base de datos */
-            return control.insert(participante) != null;
+            return control.insert(participante, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -132,7 +146,12 @@ public class ParticipantRegisterHandler implements RegisterHandler {
      *          {@link #validateForm(ParticipantModel)}
      */
     public boolean insertFromForm(ParticipantModel participant) {
-        return control.insert(participant) != null;
+        try {
+            return control.insert(participant, conn) != null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -166,7 +185,7 @@ public class ParticipantRegisterHandler implements RegisterHandler {
         }
 
         // *Validamos que no existan participantes con el mismo correo o nombre */
-        String validation = control.validateParticipant(participante);
+        String validation = control.validateParticipant(participante, conn);
         if (!"Ok".equals(validation)) {
             return validation;
         }

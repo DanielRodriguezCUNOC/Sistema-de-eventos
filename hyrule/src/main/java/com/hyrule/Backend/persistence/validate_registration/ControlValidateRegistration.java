@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.hyrule.Backend.connection.DBConnection;
 import com.hyrule.Backend.model.validate_registration.ValidateRegistrationModel;
 import com.hyrule.Backend.persistence.Control;
 
@@ -17,42 +16,29 @@ import com.hyrule.Backend.persistence.Control;
  */
 public class ControlValidateRegistration extends Control<ValidateRegistrationModel> {
 
-    /** Conexión a la base de datos */
-    private DBConnection dbConnection;
-    private Connection conn;
-
     /**
      * Constructor que inicializa la conexión a la base de datos.
      */
     public ControlValidateRegistration() {
-        this.dbConnection = new DBConnection();
-        this.conn = dbConnection.getConnection();
-    }
-
-    /**
-     * Constructor que recibe una conexión existente.
-     */
-    public ControlValidateRegistration(Connection connection) {
-        this.dbConnection = new DBConnection();
-        this.conn = connection;
     }
 
     /**
      * Inserta una nueva validación de inscripción.
      * 
      * @param entity la validación a insertar
-     * @return la validación insertada o null si falla
+     * @param conn   la conexión a la base de datos
+     * @return la validación insertada
      * @throws SQLException si ocurre un error en la base de datos
      */
     @Override
-    public ValidateRegistrationModel insert(ValidateRegistrationModel entity) throws SQLException {
+    public ValidateRegistrationModel insert(ValidateRegistrationModel entity, Connection conn) throws SQLException {
 
         // *Generamos el sql */
         String sql = "INSERT INTO validar_inscripcion (correo_participante, codigo_evento) VALUES (?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);) {
-
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
+
             try {
                 pstmt.setString(1, entity.getCorreo());
                 pstmt.setString(2, entity.getCodigoEvento());
@@ -69,9 +55,8 @@ public class ControlValidateRegistration extends Control<ValidateRegistrationMod
                 throw e;
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new SQLException("Error inesperado durante la inserción", e);
+        } catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -79,10 +64,11 @@ public class ControlValidateRegistration extends Control<ValidateRegistrationMod
      * Actualiza una validación existente.
      * 
      * @param entity la validación con datos actualizados
+     * @param conn   la conexión a la base de datos
      * @throws SQLException si ocurre un error en la base de datos
      */
     @Override
-    public void update(ValidateRegistrationModel entity) throws SQLException {
+    public void update(ValidateRegistrationModel entity, Connection conn) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
@@ -90,11 +76,12 @@ public class ControlValidateRegistration extends Control<ValidateRegistrationMod
     /**
      * Elimina una validación por clave.
      * 
-     * @param key la clave de la validación a eliminar
+     * @param key  la clave de la validación a eliminar
+     * @param conn la conexión a la base de datos
      * @throws SQLException si ocurre un error en la base de datos
      */
     @Override
-    public void delete(String key) throws SQLException {
+    public void delete(String key, Connection conn) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
@@ -102,12 +89,13 @@ public class ControlValidateRegistration extends Control<ValidateRegistrationMod
     /**
      * Busca una validación por clave.
      * 
-     * @param key la clave de búsqueda
+     * @param key  la clave de búsqueda
+     * @param conn la conexión a la base de datos
      * @return la validación encontrada o null
      * @throws SQLException si ocurre un error en la base de datos
      */
     @Override
-    public ValidateRegistrationModel findByKey(String key) throws SQLException {
+    public ValidateRegistrationModel findByKey(String key, Connection conn) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findByKey'");
     }
@@ -115,11 +103,12 @@ public class ControlValidateRegistration extends Control<ValidateRegistrationMod
     /**
      * Obtiene todas las validaciones registradas.
      * 
+     * @param conn la conexión a la base de datos
      * @return lista de todas las validaciones
      * @throws SQLException si ocurre un error en la base de datos
      */
     @Override
-    public List<ValidateRegistrationModel> findAll() throws SQLException {
+    public List<ValidateRegistrationModel> findAll(Connection conn) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
@@ -128,16 +117,17 @@ public class ControlValidateRegistration extends Control<ValidateRegistrationMod
      * Valida una inscripción verificando que esté registrada y pagada.
      * 
      * @param registration la validación a procesar
+     * @param conn         la conexión a la base de datos
      * @return "Ok" si es válida, mensaje de error si no
      */
-    public String validateRegistration(ValidateRegistrationModel registration) {
+    public String validateRegistration(ValidateRegistrationModel registration, Connection conn) {
         try {
 
-            if (existsRegistration(registration)) {
+            if (existsRegistration(registration, conn)) {
                 return "Ya se ha validado la inscripción para este participante y evento.";
             }
 
-            if (!isRegisteredAndPaid(registration)) {
+            if (!isRegisteredAndPaid(registration, conn)) {
                 return "El participante no está inscrito o no ha pagado.";
             }
 
@@ -153,44 +143,43 @@ public class ControlValidateRegistration extends Control<ValidateRegistrationMod
      * Verifica si el participante está inscrito y ha pagado el evento.
      * 
      * @param registration la validación con correo y código de evento
+     * @param conn         la conexión a la base de datos
      * @return true si está inscrito y pagado
      * @throws SQLException si ocurre un error en la consulta
      */
-    private boolean isRegisteredAndPaid(ValidateRegistrationModel registration) throws SQLException {
+    private boolean isRegisteredAndPaid(ValidateRegistrationModel registration, Connection conn) throws SQLException {
 
         // *Generamos el sql */
 
         String sql = "SELECT i.codigo_evento, p.correo_participante FROM inscripcion i JOIN pago p ON i.codigo_evento = p.codigo_evento AND i.correo_participante = p.correo_participante WHERE i.codigo_evento = ? AND i.correo_participante = ?";
 
-        try (Connection conn = dbConnection.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, registration.getCodigoEvento());
             pstmt.setString(2, registration.getCorreo());
             try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next();
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw e;
         }
-        return false;
     }
 
     /**
      * Verifica si ya existe una validación para el participante y evento.
      * 
      * @param registration la validación a verificar
+     * @param conn         la conexión a la base de datos
      * @return true si ya existe, false si no
      * @throws SQLException si ocurre un error en la consulta
      */
-    private boolean existsRegistration(ValidateRegistrationModel registration) throws SQLException {
+    private boolean existsRegistration(ValidateRegistrationModel registration, Connection conn) throws SQLException {
 
         // *Generamos el sql */
 
         String sql = "SELECT COUNT(*) FROM validar_inscripcion WHERE correo_participante = ? AND codigo_evento = ?";
 
-        try (Connection conn = dbConnection.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, registration.getCorreo());
 
             pstmt.setString(2, registration.getCodigoEvento());

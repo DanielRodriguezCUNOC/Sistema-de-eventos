@@ -1,6 +1,7 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionActividad;
@@ -18,7 +19,17 @@ public class ActivityRegisterHandler implements RegisterHandler {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
     /** Controlador de persistencia para operaciones de actividades */
-    private final ControlActivity control = new ControlActivity();
+    private ControlActivity control = new ControlActivity();
+
+    /** Conexión a la base de datos. */
+    private Connection conn;
+
+    /**
+     * Constructor que recibe la conexión a la base de datos.
+     */
+    public ActivityRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /** Validador singleton para verificar duplicados y participantes */
     ValidationArchive validator = ValidationArchive.getInstance();
@@ -68,7 +79,7 @@ public class ActivityRegisterHandler implements RegisterHandler {
             validator.addActividad(actividad);
 
             // * Insertamos la actividad en la base de datos */
-            return control.insert(actividad) != null;
+            return control.insert(actividad, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -88,7 +99,7 @@ public class ActivityRegisterHandler implements RegisterHandler {
      */
     public boolean insertFromForm(ActivityModel activity) {
         try {
-            return control.insert(activity) != null;
+            return control.insert(activity, conn) != null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -109,7 +120,7 @@ public class ActivityRegisterHandler implements RegisterHandler {
             return "Datos de la actividad inválidos.";
         }
 
-        String validation = control.validateActivity(activity);
+        String validation = control.validateActivity(activity, conn);
         if (!"Ok".equals(validation)) {
             return validation;
 

@@ -1,6 +1,8 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionEvento;
 import com.hyrule.Backend.Validation.ValidationArchive;
@@ -17,7 +19,17 @@ public class EventRegisterHandler implements RegisterHandler {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     /** Controlador de persistencia para operaciones de eventos */
-    private final ControlEvent control = new ControlEvent();
+    private ControlEvent control = new ControlEvent();
+
+    /** Conexión a la base de datos. */
+    private Connection conn;
+
+    /**
+     * Constructor que recibe la conexión a la base de datos.
+     */
+    public EventRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /** Validador singleton para verificar duplicados */
     ValidationArchive validator = ValidationArchive.getInstance();
@@ -62,7 +74,7 @@ public class EventRegisterHandler implements RegisterHandler {
             logWriter.newLine();
 
             // * Insertamos el evento en la base de datos */
-            return control.insert(event) != null;
+            return control.insert(event, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -81,7 +93,12 @@ public class EventRegisterHandler implements RegisterHandler {
      * @return true si se insertó correctamente
      */
     public boolean insertFromForm(EventModel event) {
-        return control.insert(event) != null;
+        try {
+            return control.insert(event, conn) != null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -100,7 +117,7 @@ public class EventRegisterHandler implements RegisterHandler {
             return "Datos del evento inválidos.";
         }
 
-        String validation = control.validateEvent(event);
+        String validation = control.validateEvent(event, conn);
         if (!"Ok".equals(validation)) {
             return validation;
 

@@ -1,5 +1,6 @@
 package com.hyrule.Backend.persistence;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public abstract class Control<T> {
      * @return la entidad insertada
      * @throws SQLException si ocurre un error en la base de datos
      */
-    public abstract T insert(T entity) throws SQLException;
+    public abstract T insert(T entity, Connection conn) throws SQLException;
 
     /**
      * Actualiza una entidad existente en la base de datos.
@@ -26,7 +27,7 @@ public abstract class Control<T> {
      * @param entity la entidad con datos actualizados
      * @throws SQLException si ocurre un error en la base de datos
      */
-    public abstract void update(T entity) throws SQLException;
+    public abstract void update(T entity, Connection conn) throws SQLException;
 
     /**
      * Elimina una entidad por su clave.
@@ -34,7 +35,7 @@ public abstract class Control<T> {
      * @param key la clave de la entidad a eliminar
      * @throws SQLException si ocurre un error en la base de datos
      */
-    public abstract void delete(String key) throws SQLException;
+    public abstract void delete(String key, Connection conn) throws SQLException;
 
     /**
      * Busca una entidad por su clave.
@@ -43,7 +44,7 @@ public abstract class Control<T> {
      * @return la entidad encontrada o null si no existe
      * @throws SQLException si ocurre un error en la base de datos
      */
-    public abstract T findByKey(String key) throws SQLException;
+    public abstract T findByKey(String key, Connection conn) throws SQLException;
 
     /**
      * Obtiene todas las entidades almacenadas.
@@ -51,6 +52,6 @@ public abstract class Control<T> {
      * @return lista de todas las entidades
      * @throws SQLException si ocurre un error en la base de datos
      */
-    public abstract List<T> findAll() throws SQLException;
+    public abstract List<T> findAll(Connection conn) throws SQLException;
 
 }

@@ -2,6 +2,7 @@ package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,15 @@ import com.hyrule.interfaces.RegisterHandler;
 public class PaymentRegisterHandler implements RegisterHandler {
 
     /** Controlador de persistencia para operaciones de pagos */
-    private static final ControlPayment control = new ControlPayment();
+    private ControlPayment control = new ControlPayment();
+
+    /** Conexión a la base de datos. */
+    private Connection conn;
+
+    /** Constructor que recibe la conexión a la base de datos. */
+    public PaymentRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /** Validador singleton para verificar duplicados y eventos */
     ValidationArchive validator = ValidationArchive.getInstance();
@@ -67,7 +76,7 @@ public class PaymentRegisterHandler implements RegisterHandler {
             logWriter.newLine();
 
             // Insertamos el pago en la base de datos */
-            return control.insert(pago) != null;
+            return control.insert(pago, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -87,7 +96,7 @@ public class PaymentRegisterHandler implements RegisterHandler {
      */
     public boolean insertFromForm(PaymentModel pago) {
         try {
-            return control.insert(pago) != null;
+            return control.insert(pago, conn) != null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -111,7 +120,7 @@ public class PaymentRegisterHandler implements RegisterHandler {
                 return "El pago no es válido.";
             }
 
-            String validation = control.validatePayment(pago);
+            String validation = control.validatePayment(pago, conn);
             if (!"Ok".equals(validation)) {
                 return validation;
             }

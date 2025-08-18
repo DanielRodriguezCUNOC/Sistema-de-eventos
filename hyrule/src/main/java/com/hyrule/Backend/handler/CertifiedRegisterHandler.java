@@ -1,6 +1,7 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.hyrule.Backend.RegularExpresion.RExpresionCertificado;
@@ -16,7 +17,17 @@ import com.hyrule.interfaces.RegisterHandler;
 public class CertifiedRegisterHandler implements RegisterHandler {
 
     /** Controlador de persistencia para operaciones de certificados */
-    public static final ControlCertified control = new ControlCertified();
+    public ControlCertified control = new ControlCertified();
+
+    /** Conexión a la base de datos. */
+    private Connection conn;
+
+    /**
+     * Constructor que recibe la conexión a la base de datos.
+     */
+    public CertifiedRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /** Validador singleton para verificar duplicados */
     ValidationArchive validator = ValidationArchive.getInstance();
@@ -52,7 +63,7 @@ public class CertifiedRegisterHandler implements RegisterHandler {
             validator.addCertificado(certified);
 
             // * Insertamos el certificado en la base de datos */
-            return control.insert(certified) != null;
+            return control.insert(certified, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -72,7 +83,7 @@ public class CertifiedRegisterHandler implements RegisterHandler {
      */
     public boolean insertFromForm(CertifiedModel certified) {
         try {
-            return control.insert(certified) != null;
+            return control.insert(certified, conn) != null;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -95,7 +106,7 @@ public class CertifiedRegisterHandler implements RegisterHandler {
             return "Datos del certificado inválidos.";
         }
 
-        String validationMessage = control.validateCertificate(certified);
+        String validationMessage = control.validateCertificate(certified, conn);
         if (!validationMessage.equals("Ok")) {
             return validationMessage;
         }

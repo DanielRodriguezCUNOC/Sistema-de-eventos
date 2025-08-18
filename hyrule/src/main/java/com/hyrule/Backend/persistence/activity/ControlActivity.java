@@ -6,87 +6,157 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.hyrule.Backend.connection.DBConnection;
 import com.hyrule.Backend.model.activity.ActivityModel;
 import com.hyrule.Backend.persistence.Control;
 
+/**
+ * Controlador de persistencia para operaciones CRUD de actividades.
+ * Gestiona validaciones de horarios y registros de actividades de eventos.
+ */
 public class ControlActivity extends Control<ActivityModel> {
 
+    /**
+     * Inserta una nueva actividad en la base de datos.
+     * 
+     * @param entity la actividad a insertar
+     * @param conn   la conexión a la base de datos
+     * @return la actividad insertada
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
-    public ActivityModel insert(ActivityModel entity) throws SQLException {
+    public ActivityModel insert(ActivityModel entity, Connection conn) throws SQLException {
 
         // *Generamos la query*/
         String query = "INSERT INTO actividad (codigo_actividad, codigo_evento, correo_ponente, titulo_actividad,  tipo_actividad, cupo_maximo, hora_inicio, hora_fin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = new DBConnection().getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, entity.getCodigoActividad());
-            pstmt.setString(2, entity.getCodigoEvento());
-            pstmt.setString(3, entity.getCorreo());
-            pstmt.setString(4, entity.getTituloActividad());
-            pstmt.setString(5, entity.getTipoActividad().toString());
-            pstmt.setInt(6, entity.getCupoMaximo());
-            pstmt.setString(7, entity.getHoraInicio().toString());
-            pstmt.setString(8, entity.getHoraFin().toString());
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            conn.setAutoCommit(false);
 
-            pstmt.executeUpdate();
+            try {
+                pstmt.setString(1, entity.getCodigoActividad());
+                pstmt.setString(2, entity.getCodigoEvento());
+                pstmt.setString(3, entity.getCorreo());
+                pstmt.setString(4, entity.getTituloActividad());
+                pstmt.setString(5, entity.getTipoActividad().toString());
+                pstmt.setInt(6, entity.getCupoMaximo());
+                pstmt.setString(7, entity.getHoraInicio().toString());
+                pstmt.setString(8, entity.getHoraFin().toString());
+
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    conn.rollback();
+                    throw new SQLException("No se pudo insertar la actividad, no se afectaron filas.");
+                }
+                conn.commit();
+                return entity;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return entity;
     }
 
+    /**
+     * Actualiza una actividad existente.
+     * 
+     * @param entity la actividad con datos actualizados
+     * @param conn   la conexión a la base de datos
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
-    public void update(ActivityModel entity) {
+    public void update(ActivityModel entity, Connection conn) throws SQLException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
+    /**
+     * Elimina una actividad por clave.
+     * 
+     * @param key  la clave de la actividad a eliminar
+     * @param conn la conexión a la base de datos
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
-    public void delete(String key) {
+    public void delete(String key, Connection conn) throws SQLException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
+    /**
+     * Busca una actividad por clave.
+     * 
+     * @param key  la clave de búsqueda
+     * @param conn la conexión a la base de datos
+     * @return la actividad encontrada o null
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
-    public ActivityModel findByKey(String key) {
-        return null;
+    public ActivityModel findByKey(String key, Connection conn) throws SQLException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findByKey'");
     }
 
+    /**
+     * Obtiene todas las actividades registradas.
+     * 
+     * @param conn la conexión a la base de datos
+     * @return lista de todas las actividades
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
-    public List<ActivityModel> findAll() throws SQLException {
+    public List<ActivityModel> findAll(Connection conn) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
-    // *Funcion para validar la actividad */
-
-    public String validateActivity(ActivityModel activity) {
+    /**
+     * Valida una actividad verificando conflictos de horarios y duplicados.
+     * 
+     * @param activity la actividad a validar
+     * @param conn     la conexión a la base de datos
+     * @return "Ok" si es válida, mensaje de error si no
+     */
+    public String validateActivity(ActivityModel activity, Connection conn) {
 
         if (existsByNameAndTime(activity.getCodigoEvento(), activity.getHoraInicio().toString(),
-                activity.getHoraFin().toString())) {
+                activity.getHoraFin().toString(), conn)) {
             return "Ya existe una actividad con el mismo nombre y hora en el evento.";
 
         }
-        if (existsByCode(activity.getCodigoActividad(), activity.getCodigoEvento())) {
+        if (existsByCode(activity.getCodigoActividad(), activity.getCodigoEvento(), conn)) {
             return "Ya existe una actividad con el mismo código en el evento.";
         }
 
-        if (!existsByEventAndParticipant(activity.getCodigoEvento(), activity.getCorreo())) {
+        if (!existsByEventAndParticipant(activity.getCodigoEvento(), activity.getCorreo(), conn)) {
             return "El evento o el ponente no están registrados.";
         }
 
         return "Ok";
     }
 
-    // *Funcion para evitar duplicaciones de actividades */
-    public boolean existsByCode(String codigoActividad, String codigoEvento) {
+    /**
+     * Verifica si ya existe una actividad con el mismo código en el evento.
+     * 
+     * @param codigoActividad el código de la actividad a verificar
+     * @param codigoEvento    el código del evento
+     * @param conn            la conexión a la base de datos
+     * @return true si ya existe, false si no
+     */
+    public boolean existsByCode(String codigoActividad, String codigoEvento, Connection conn) {
         String query = "SELECT COUNT(*) FROM actividad WHERE codigo_actividad = ? AND codigo_evento = ?";
 
-        try (Connection conn = new DBConnection().getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, codigoActividad);
             pstmt.setString(2, codigoEvento);
 
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -94,20 +164,27 @@ public class ControlActivity extends Control<ActivityModel> {
         return false;
     }
 
-    // *Funcion para buscar si una actividad tiene el mismo nombre y hora */
-
-    public boolean existsByNameAndTime(String codigoEvento, String horaInicio, String horaFin) {
+    /**
+     * Verifica si ya existe una actividad con los mismos horarios en el evento.
+     * 
+     * @param codigoEvento el código del evento
+     * @param horaInicio   la hora de inicio de la actividad
+     * @param horaFin      la hora de fin de la actividad
+     * @param conn         la conexión a la base de datos
+     * @return true si ya existe conflicto de horarios, false si no
+     */
+    public boolean existsByNameAndTime(String codigoEvento, String horaInicio, String horaFin, Connection conn) {
         String query = "SELECT COUNT(*) FROM actividad WHERE codigo_evento = ? AND hora_inicio = ? AND hora_fin = ?";
 
-        try (Connection conn = new DBConnection().getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, codigoEvento);
             pstmt.setString(2, horaInicio);
             pstmt.setString(3, horaFin);
 
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -115,19 +192,25 @@ public class ControlActivity extends Control<ActivityModel> {
         return false;
     }
 
-    // *Funcion para verificar que el evento y el participante exista */
-
-    public boolean existsByEventAndParticipant(String codigoEvento, String correoPonente) {
+    /**
+     * Verifica si existen el evento y el participante (ponente) especificados.
+     * 
+     * @param codigoEvento  el código del evento a verificar
+     * @param correoPonente el correo del ponente a verificar
+     * @param conn          la conexión a la base de datos
+     * @return true si ambos existen, false si no
+     */
+    public boolean existsByEventAndParticipant(String codigoEvento, String correoPonente, Connection conn) {
         String query = "SELECT (SELECT COUNT(*) FROM evento WHERE codigo_evento = ?) AS exists_event, (SELECT COUNT(*) FROM participante WHERE correo_participante = ?) AS exists_participant";
 
-        try (Connection conn = new DBConnection().getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, codigoEvento);
             pstmt.setString(2, correoPonente);
 
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("exists_event") > 0 && rs.getInt("exists_participant") > 0;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("exists_event") > 0 && rs.getInt("exists_participant") > 0;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

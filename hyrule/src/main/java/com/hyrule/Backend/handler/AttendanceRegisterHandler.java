@@ -1,6 +1,7 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.hyrule.Backend.RegularExpresion.RExpresionAsistencia;
@@ -16,7 +17,15 @@ import com.hyrule.interfaces.RegisterHandler;
 public class AttendanceRegisterHandler implements RegisterHandler {
 
     /** Controlador de persistencia para operaciones de asistencias */
-    public static final ControlAttendance control = new ControlAttendance();
+    public ControlAttendance control = new ControlAttendance();
+
+    /** Conexión a la base de datos. */
+    private Connection conn;
+
+    /** Constructor que recibe la conexión a la base de datos. */
+    public AttendanceRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /** Validador singleton para verificar duplicados */
     ValidationArchive validator = ValidationArchive.getInstance();
@@ -53,7 +62,7 @@ public class AttendanceRegisterHandler implements RegisterHandler {
             validator.addAsistencia(attendance);
 
             // * Insertamos la asistencia en la base de datos */
-            return control.insert(attendance) != null;
+            return control.insert(attendance, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -75,7 +84,7 @@ public class AttendanceRegisterHandler implements RegisterHandler {
 
         // * Insertamos la asistencia en la base de datos */
         try {
-            return control.insert(attendance) != null;
+            return control.insert(attendance, conn) != null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -100,7 +109,7 @@ public class AttendanceRegisterHandler implements RegisterHandler {
         }
 
         try {
-            String validation = control.validateAttendance(attendance);
+            String validation = control.validateAttendance(attendance, conn);
 
             if (!"Ok".equals(validation)) {
                 return validation;
