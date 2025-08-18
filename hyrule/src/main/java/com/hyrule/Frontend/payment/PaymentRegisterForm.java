@@ -108,7 +108,7 @@ public class PaymentRegisterForm extends JInternalFrame {
         };
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(100, 149, 237), 2, true),
-                "Registro de Pago",
+                "",
                 TitledBorder.CENTER,
                 TitledBorder.TOP,
                 new Font("Segoe UI", Font.BOLD, 18),
@@ -132,7 +132,7 @@ public class PaymentRegisterForm extends JInternalFrame {
 
         btnRegistrar = createModernButton("Registrar", new Color(100, 149, 237));
         btnCancelar = createModernButton("Cancelar", new Color(220, 53, 69));
-        btnRegresar = createModernButton("Regresar", new Color(108, 117, 125));
+        btnRegresar = createModernButton("⬅️ Regresar", new Color(252, 141, 18));
 
         configurarAccionesBotones();
 
@@ -231,7 +231,7 @@ public class PaymentRegisterForm extends JInternalFrame {
                     "Error de validacion", JOptionPane.ERROR_MESSAGE);
         }
 
-        PaymentRegisterHandler validator = new PaymentRegisterHandler();
+        PaymentRegisterHandler validator = new PaymentRegisterHandler(adminView.getConnection());
 
         String validationMsg = validator.validateForm(pago);
         if (!"Ok".equals(validationMsg)) {

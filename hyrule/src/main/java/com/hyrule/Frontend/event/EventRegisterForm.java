@@ -32,7 +32,7 @@ public class EventRegisterForm extends JInternalFrame {
 
         super("", true, true, true, true);
         this.adminView = adminView;
-        adminView.setTitle("Registro de Eventos");
+        adminView.setTitle("Registrar Evento");
 
         setLayout(new BorderLayout());
         setSize(1000, 750);
@@ -123,9 +123,9 @@ public class EventRegisterForm extends JInternalFrame {
 
         txtCodigoEvento = createStyledTextField("EVT-00000001");
         txtFechaEvento = createStyledTextField("DD/MM/YYYY");
-        txtTitulo = createStyledTextField("Título del Evento");
-        txtUbicacion = createStyledTextField("Ubicación del Evento");
-        txtCostoEvento = createStyledTextField("Costo del Evento");
+        txtTitulo = createStyledTextField("Tecnología Sheikah");
+        txtUbicacion = createStyledTextField("Auditorio Central");
+        txtCostoEvento = createStyledTextField("75.00");
 
         comboTipoEvento = new JComboBox<>(new String[] { "CHARLA", "CONGRESO", "TALLER", "DEBATE" });
         comboTipoEvento.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -263,7 +263,7 @@ public class EventRegisterForm extends JInternalFrame {
             return;
         }
 
-        EventRegisterHandler validator = new EventRegisterHandler();
+        EventRegisterHandler validator = new EventRegisterHandler(adminView.getConnection());
 
         String validationMsg = validator.validateForm(evento, fechaStr, costoEventoStr);
 
@@ -272,7 +272,7 @@ public class EventRegisterForm extends JInternalFrame {
                 JOptionPane.showMessageDialog(this, "Evento registrado exitosamente", "Éxito",
                         JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Error al registrar el evento en la BD.",
+                JOptionPane.showMessageDialog(this, "Error al registrar el evento.",
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {

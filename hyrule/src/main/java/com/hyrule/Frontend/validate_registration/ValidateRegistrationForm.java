@@ -31,7 +31,7 @@ public class ValidateRegistrationForm extends JInternalFrame {
         this.adminView = adminView;
         adminView.setTitle("Validar Inscripción");
         setLayout(new BorderLayout());
-        setSize(1000, 740);
+        setSize(1000, 750);
 
         controlPayment = new ControlPayment();
 
@@ -45,7 +45,7 @@ public class ValidateRegistrationForm extends JInternalFrame {
         panel.setBackground(new Color(245, 245, 245));
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(100, 149, 237), 2, true),
-                "Validar Inscripción",
+                "",
                 TitledBorder.CENTER,
                 TitledBorder.TOP,
                 new Font("SansSerif", Font.BOLD, 18),
@@ -100,7 +100,7 @@ public class ValidateRegistrationForm extends JInternalFrame {
     private void cargarDatos() {
         tableModel.setRowCount(0);
         try {
-            List<PaymentModel> pagos = controlPayment.findAll();
+            List<PaymentModel> pagos = controlPayment.findAll(adminView.getConnection());
             for (PaymentModel p : pagos) {
                 tableModel.addRow(new Object[] { p.getCorreo(), p.getCodigoEvento(), "Validar", "Invalidar" });
             }
@@ -118,7 +118,7 @@ public class ValidateRegistrationForm extends JInternalFrame {
         }
 
         try {
-            List<PaymentModel> pagos = controlPayment.findPaymentsByCorreoOrEvento(filtro);
+            List<PaymentModel> pagos = controlPayment.findPaymentsByCorreoOrEvento(filtro, adminView.getConnection());
             for (PaymentModel p : pagos) {
                 tableModel.addRow(new Object[] { p.getCorreo(), p.getCodigoEvento(), "Validar", "Invalidar" });
             }
@@ -136,7 +136,8 @@ public class ValidateRegistrationForm extends JInternalFrame {
 
         ValidateRegistrationModel registro = new ValidateRegistrationModel(correo, codigoEvento);
 
-        ValidateInscripcionRegisterHandler validator = new ValidateInscripcionRegisterHandler();
+        ValidateInscripcionRegisterHandler validator = new ValidateInscripcionRegisterHandler(
+                adminView.getConnection());
 
         String resultado = validator.validateForm(registro);
         if ("Ok".equals(resultado)) {

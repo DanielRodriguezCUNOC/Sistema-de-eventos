@@ -5,6 +5,9 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
+import com.hyrule.Backend.handler.InscripcionRegisterHandler;
+import com.hyrule.Backend.model.inscripcion.RegistrationModel;
+import com.hyrule.Backend.model.inscripcion.RegistrationType;
 import com.hyrule.Frontend.AdminModule;
 
 import javax.swing.border.TitledBorder;
@@ -100,7 +103,7 @@ public class InscripcionRegisterForm extends JInternalFrame {
         };
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(100, 149, 237), 2, true),
-                "Registro de Inscripción",
+                "",
                 TitledBorder.CENTER,
                 TitledBorder.TOP,
                 new Font("Segoe UI", Font.BOLD, 18),
@@ -124,7 +127,7 @@ public class InscripcionRegisterForm extends JInternalFrame {
         // Botones
         btnRegistrar = createModernButton("Registrar", new Color(100, 149, 237));
         btnCancelar = createModernButton("Cancelar", new Color(220, 53, 69));
-        btnRegresar = createModernButton("Regresar", new Color(108, 117, 125));
+        btnRegresar = createModernButton("⬅️ Regresar", new Color(252, 141, 18));
 
         configurarAccionesBotones();
 
@@ -202,8 +205,35 @@ public class InscripcionRegisterForm extends JInternalFrame {
     }
 
     private void registrarInscripcion() {
-        // Aquí iría la lógica de validación e inserción
-        JOptionPane.showMessageDialog(this, "Inscripción registrada exitosamente.", "Éxito",
-                JOptionPane.INFORMATION_MESSAGE);
+
+        String correo = txtCorreoParticipante.getText().trim();
+        String codigoEvento = txtCodigoEvento.getText().trim();
+        String tipoInscripcion = (String) comboTipoInscripcion.getSelectedItem();
+
+        RegistrationModel inscripcion = null;
+        try {
+            RegistrationType tipo = RegistrationType.valueOf(tipoInscripcion.toUpperCase());
+            inscripcion = new RegistrationModel(correo, codigoEvento, tipo);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Tipo de inscripción inválido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        InscripcionRegisterHandler validator = new InscripcionRegisterHandler(adminView.getConnection());
+
+        String validationMsg = validator.validateForm(inscripcion);
+        if (!"Ok".equals(validationMsg)) {
+            if (validator.insertFromForm(inscripcion)) {
+                JOptionPane.showMessageDialog(this, "Inscripción registrada exitosamente.", "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
+                limpiarCampos();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al registrar la inscripción.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al registrar la inscripción: " + validationMsg, "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

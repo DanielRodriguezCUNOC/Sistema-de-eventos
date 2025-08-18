@@ -250,12 +250,12 @@ public class ParticipantRegisterForm extends JInternalFrame {
 
         ParticipantModel participante = new ParticipantModel(correo, nombre, tipoParticipante, institucion);
 
-        ParticipantRegisterHandler handler = new ParticipantRegisterHandler();
+        ParticipantRegisterHandler validator = new ParticipantRegisterHandler(adminView.getConnection());
 
-        String validationMsg = handler.validateForm(participante);
+        String validationMsg = validator.validateForm(participante);
 
         if ("Ok".equals(validationMsg)) {
-            if (handler.insertFromForm(participante)) {
+            if (validator.insertFromForm(participante)) {
                 JOptionPane.showMessageDialog(this, "Participante registrado exitosamente.", "Éxito",
                         JOptionPane.INFORMATION_MESSAGE);
             } else {

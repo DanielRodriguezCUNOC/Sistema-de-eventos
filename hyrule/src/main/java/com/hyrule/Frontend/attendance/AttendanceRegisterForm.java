@@ -100,7 +100,7 @@ public class AttendanceRegisterForm extends JInternalFrame {
                 BorderFactory.createEmptyBorder(20, 20, 20, 20),
                 BorderFactory.createTitledBorder(
                         BorderFactory.createLineBorder(new Color(100, 149, 237), 2, true),
-                        "Registro de Asistencia",
+                        "",
                         TitledBorder.CENTER,
                         TitledBorder.TOP,
                         new Font("SansSerif", Font.BOLD, 18),
@@ -208,7 +208,7 @@ public class AttendanceRegisterForm extends JInternalFrame {
 
         AttendanceModel attendance = new AttendanceModel(correo, codigoActividad);
 
-        AttendanceRegisterHandler validator = new AttendanceRegisterHandler();
+        AttendanceRegisterHandler validator = new AttendanceRegisterHandler(adminView.getConnection());
 
         String validationMsg = validator.validateForm(attendance);
 

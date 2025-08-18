@@ -26,9 +26,10 @@ public class UploadArchiveFrame extends JInternalFrame {
     public UploadArchiveFrame(AdminModule adminView) {
         super("", true, true, true, true);
         this.adminView = adminView;
+        adminView.setTitle("Cargar Archivo");
 
         setLayout(new BorderLayout());
-        setSize(1000, 740);
+        setSize(1000, 750);
         initComponents();
         modificarVentana();
     }

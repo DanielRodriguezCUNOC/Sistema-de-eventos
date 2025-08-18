@@ -45,7 +45,7 @@ public class ActivityRegisterForm extends JInternalFrame {
     public ActivityRegisterForm() {
         super("", true, true, true, true);
         setLayout(new BorderLayout());
-        setSize(1000, 740);
+        setSize(1000, 750);
         initComponents();
         modificarVentana();
     }
@@ -269,7 +269,7 @@ public class ActivityRegisterForm extends JInternalFrame {
             return;
         }
 
-        ActivityRegisterHandler validator = new ActivityRegisterHandler();
+        ActivityRegisterHandler validator = new ActivityRegisterHandler(adminView.getConnection());
 
         String validationMsg = validator.validateForm(actividad);
 
