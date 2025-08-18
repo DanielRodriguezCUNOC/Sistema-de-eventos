@@ -3,6 +3,7 @@ package com.hyrule.Backend.handler;
 import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionEvento;
 import com.hyrule.Backend.Validation.ValidationArchive;
@@ -16,6 +17,7 @@ import com.hyrule.interfaces.RegisterHandler;
  */
 public class EventRegisterHandler implements RegisterHandler {
 
+    /** Formato de fecha para validaciones y registros */
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     /** Controlador de persistencia para operaciones de eventos */
@@ -43,6 +45,7 @@ public class EventRegisterHandler implements RegisterHandler {
      */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
+        DateTimeFormatter logTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         try {
 
             // *Validamos la linea con la expresion regular */
@@ -50,35 +53,47 @@ public class EventRegisterHandler implements RegisterHandler {
             EventModel event = parser.parseEvent(linea.trim());
 
             if (event == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
+                logWriter.write(String.format("[%s] [ERROR] Linea inválida: %s",
+                        LocalDateTime.now().format(logTimeFormat), linea));
                 logWriter.newLine();
                 return false;
             }
             if (validator.existsEvent(event.getCodigoEvento())) {
-                logWriter.write("El evento ya existe: " + event.getCodigoEvento());
+                logWriter.write(String.format("[%s] [ERROR] El evento ya existe: %s",
+                        LocalDateTime.now().format(logTimeFormat), event.getCodigoEvento()));
                 logWriter.newLine();
                 return false;
 
             }
             if (validator.eventHaveSameTitleAndDate(event.getTituloEvento(), event.getFechaEvento())) {
-                logWriter.write("Ya existe un evento con el mismo título y fecha: " + event.getTituloEvento() + " - "
-                        + event.getFechaEvento().format(DATE_FORMAT));
+                logWriter.write(String.format("[%s] [ERROR] Ya existe un evento con el mismo título y fecha: %s - %s",
+                        LocalDateTime.now().format(logTimeFormat), event.getTituloEvento(),
+                        event.getFechaEvento().format(DATE_FORMAT)));
                 logWriter.newLine();
                 return false;
             }
 
-            // *Agregamos el evento a la estructura de validacion */
-            validator.addEvento(event);
+            if (control.insert(event, conn) != null) {
+                logWriter.write(String.format("[%s] [INFO] - Evento registrado: %s",
+                        LocalDateTime.now().format(logTimeFormat),
+                        event.toString()));
+                logWriter.newLine();
 
-            logWriter.write("Evento registrado: " + event);
-            logWriter.newLine();
-
-            // * Insertamos el evento en la base de datos */
-            return control.insert(event, conn) != null;
+                // * Añadimos el evento al validador para futuras validaciones */
+                validator.addEvento(event);
+                return true;
+            } else {
+                logWriter.write(String.format("[%s] [ERROR] No se pudo insertar el evento: %s",
+                        LocalDateTime.now().format(logTimeFormat), event.toString()));
+                logWriter.newLine();
+                return false;
+            }
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando REGISTRO_EVENTO: " + e.getMessage());
+                logWriter.write(String.format("[%s] [ERROR] - Excepción no controlada: %s",
+                        LocalDateTime.now().format(logTimeFormat),
+                        e.getMessage()));
                 logWriter.newLine();
             } catch (Exception ignore) {
             }
