@@ -1,6 +1,7 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,21 @@ public class ValidateInscripcionRegisterHandler implements RegisterHandler {
      * Controlador para las operaciones de persistencia de validaciones de
      * inscripción.
      */
-    public static final ControlValidateRegistration control = new ControlValidateRegistration();
+    private ControlValidateRegistration control = new ControlValidateRegistration();
+
+    /**
+     * Conexión a la base de datos.
+     */
+    Connection conn;
+
+    /**
+     * Constructor que recibe la conexión a la base de datos.
+     * 
+     * @param conn la conexión a la base de datos
+     */
+    public ValidateInscripcionRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /**
      * Instancia del validador de archivos para verificar la integridad de los
@@ -100,7 +115,7 @@ public class ValidateInscripcionRegisterHandler implements RegisterHandler {
             logWriter.newLine();
 
             // * Insertamos la validación en la base de datos */
-            return control.insert(inscripcion) != null;
+            return control.insert(inscripcion, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -123,7 +138,7 @@ public class ValidateInscripcionRegisterHandler implements RegisterHandler {
      */
     public boolean insertFromForm(ValidateRegistrationModel validarInscripcion) {
         try {
-            return control.insert(validarInscripcion) != null;
+            return control.insert(validarInscripcion, conn) != null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -149,7 +164,7 @@ public class ValidateInscripcionRegisterHandler implements RegisterHandler {
             return "Datos invalidos";
         }
 
-        String validation = control.validateRegistration(validarInscripcion);
+        String validation = control.validateRegistration(validarInscripcion, conn);
         if (!"Ok".equals(validation)) {
             return validation;
         }

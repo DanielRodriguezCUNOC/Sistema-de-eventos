@@ -1,6 +1,7 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
 import java.util.regex.Pattern;
 
 import com.hyrule.Backend.RegularExpresion.RExpresionInscripcion;
@@ -16,7 +17,15 @@ import com.hyrule.interfaces.RegisterHandler;
 public class InscripcionRegisterHandler implements RegisterHandler {
 
     /** Controlador de persistencia para operaciones de inscripciones */
-    private static final ControlRegistration control = new ControlRegistration();
+    private ControlRegistration control = new ControlRegistration();
+
+    /** Conexión a la base de datos. */
+    private Connection conn;
+
+    /** Constructor que recibe la conexión a la base de datos. */
+    public InscripcionRegisterHandler(Connection conn) {
+        this.conn = conn;
+    }
 
     /** Validador singleton para verificar duplicados */
     ValidationArchive validator = ValidationArchive.getInstance();
@@ -55,7 +64,7 @@ public class InscripcionRegisterHandler implements RegisterHandler {
             logWriter.newLine();
 
             // *Insertamos la inscripción en la base de datos */
-            return control.insert(inscripcion) != null;
+            return control.insert(inscripcion, conn) != null;
 
         } catch (Exception e) {
             try {
@@ -75,7 +84,7 @@ public class InscripcionRegisterHandler implements RegisterHandler {
      */
     public boolean insertFromForm(RegistrationModel inscripcion) {
         try {
-            return control.insert(inscripcion) != null;
+            return control.insert(inscripcion, conn) != null;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -99,7 +108,7 @@ public class InscripcionRegisterHandler implements RegisterHandler {
                 return "Datos de inscripción inválidos";
             }
 
-            String validation = control.validateInscripcion(inscripcion);
+            String validation = control.validateInscripcion(inscripcion, conn);
 
             if (!"Ok".equals(validation)) {
                 return validation;

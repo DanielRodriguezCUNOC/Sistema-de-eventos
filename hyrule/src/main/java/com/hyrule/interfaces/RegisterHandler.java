@@ -1,6 +1,7 @@
 package com.hyrule.interfaces;
 
 import java.io.BufferedWriter;
+import java.sql.Connection;
 
 /**
  * Interfaz para el procesamiento de registros de datos.

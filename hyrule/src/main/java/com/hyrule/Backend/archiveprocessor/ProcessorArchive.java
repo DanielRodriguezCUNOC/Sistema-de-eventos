@@ -5,9 +5,11 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.hyrule.Backend.connection.DBConnection;
 import com.hyrule.Backend.handler.ActivityRegisterHandler;
 import com.hyrule.Backend.handler.AttendanceRegisterHandler;
 import com.hyrule.Backend.handler.CertifiedRegisterHandler;
@@ -20,27 +22,38 @@ import com.hyrule.interfaces.RegisterHandler;
 
 public class ProcessorArchive {
 
-    private final Map<String, RegisterHandler> handlers = new HashMap<>();
+    private final Map<String, RegisterHandler> HANDLER = new HashMap<>();
+
+    DBConnection dbConnection;
+    Connection conn;
 
     public ProcessorArchive() {
 
         // * Mapeo de tipos de eventos a sus respectivos manejadores */
 
-        handlers.put("REGISTRO_EVENTO", new EventRegisterHandler());
+        HANDLER.put("REGISTRO_EVENTO", new EventRegisterHandler(getConnection()));
 
-        handlers.put("REGISTRO_PARTICIPANTE", new ParticipantRegisterHandler());
+        HANDLER.put("REGISTRO_PARTICIPANTE", new ParticipantRegisterHandler(getConnection()));
 
-        handlers.put("REGISTRO_ACTIVIDAD", new ActivityRegisterHandler());
+        HANDLER.put("REGISTRO_ACTIVIDAD", new ActivityRegisterHandler(getConnection()));
 
-        handlers.put("INSCRIPCION", new InscripcionRegisterHandler());
+        HANDLER.put("INSCRIPCION", new InscripcionRegisterHandler(getConnection()));
 
-        handlers.put("CERTIFICADO", new CertifiedRegisterHandler());
+        HANDLER.put("CERTIFICADO", new CertifiedRegisterHandler(getConnection()));
 
-        handlers.put("VALIDAR_INSCRIPCION", new ValidateInscripcionRegisterHandler());
+        HANDLER.put("VALIDAR_INSCRIPCION", new ValidateInscripcionRegisterHandler(getConnection()));
 
-        handlers.put("ASISTENCIA", new AttendanceRegisterHandler());
+        HANDLER.put("ASISTENCIA", new AttendanceRegisterHandler(getConnection()));
 
-        handlers.put("PAGO", new PaymentRegisterHandler());
+        HANDLER.put("PAGO", new PaymentRegisterHandler(getConnection()));
+
+        // * Inicializamos la conexión a la base de datos */
+        this.dbConnection = new DBConnection();
+        try {
+            this.conn = dbConnection.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -58,7 +71,7 @@ public class ProcessorArchive {
                     continue;
                 }
                 String comando = extraerComando(linea);
-                RegisterHandler handler = handlers.get(comando);
+                RegisterHandler handler = HANDLER.get(comando);
 
                 if (handler != null) {
                     boolean estado = handler.process(linea, logWriter);
@@ -84,5 +97,9 @@ public class ProcessorArchive {
         // *Extraemos la subcadena desde el inicio hasta el parentesis*/
         // *caso contrario devolvemos la linea completa */
         return (idx > 0) ? linea.substring(0, idx) : linea;
+    }
+
+    public Connection getConnection() {
+        return conn;
     }
 }
