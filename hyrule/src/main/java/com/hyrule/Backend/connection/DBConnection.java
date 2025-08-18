@@ -4,29 +4,47 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Clase para gestionar la conexión a la base de datos MySQL.
+ * Proporciona métodos para establecer, obtener y cerrar conexiones.
+ */
 public class DBConnection {
+    /** Dirección IP del servidor de base de datos */
     private static final String IP = "localhost";
+
+    /** Puerto del servidor MySQL */
     private static final String PORT = "3306";
+
+    /** Nombre del esquema de la base de datos */
     private static final String SCHEMA = "hyruledb";
+
+    /** Usuario para la conexión a la base de datos */
     private static final String USER = "triforce_software";
+
+    /** Contraseña para la conexión a la base de datos */
+    /** Contraseña para la conexión a la base de datos */
     private static final String PASSWORD = "Hyrule";
 
-    //*Protocolo para la conexión a la base de datos */
-
+    /** Protocolo para la conexión a la base de datos */
     private static final String URL = "jdbc:mysql://" + IP + ":" + PORT + "/" + SCHEMA;
 
-    //* Método para obtener la conexión a la base de datos */
-
+    /** Instancia de la conexión a la base de datos */
     private Connection connection;
-    public void connect(){
+
+    /**
+     * Establece la conexión con la base de datos MySQL.
+     * Muestra información del esquema y catálogo una vez conectado.
+     */
+    public void connect() {
         System.out.println("URL de conexión: " + URL);
 
         try {
-                    connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                    //* Obtenemos el esquema, que significa la base de datos a la que estamos conectados */
-                    System.out.println("Esquema: " + connection.getSchema());
-                    //* El catalogo se refiere a la base de datos en uso */
-                    System.out.println("Catalogo: " + connection.getCatalog());
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            // * Obtenemos el esquema, que significa la base de datos a la que estamos
+            // conectados */
+            System.out.println("Esquema: " + connection.getSchema());
+            // * El catalogo se refiere a la base de datos en uso */
+            System.out.println("Catalogo: " + connection.getCatalog());
 
         } catch (SQLException e) {
             System.out.println("Error al conectar a la base de datos");
@@ -35,6 +53,10 @@ public class DBConnection {
 
     }
 
+    /**
+     * Cierra la conexión con la base de datos si está activa.
+     * Maneja las excepciones que puedan ocurrir durante el cierre.
+     */
     public void closeConnection() {
         if (connection != null) {
             try {
@@ -46,6 +68,12 @@ public class DBConnection {
         }
     }
 
+    /**
+     * Obtiene la conexión a la base de datos.
+     * Si no existe una conexión activa, la establece automáticamente.
+     * 
+     * @return la conexión a la base de datos
+     */
     public Connection getConnection() {
         if (connection == null) {
             connect();

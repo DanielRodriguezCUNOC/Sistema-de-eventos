@@ -1,19 +1,33 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.sql.SQLException;
+
 import com.hyrule.Backend.RegularExpresion.RExpresionCertificado;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.certified.CertifiedModel;
 import com.hyrule.Backend.persistence.certified.ControlCertified;
 import com.hyrule.interfaces.RegisterHandler;
 
+/**
+ * Manejador para el registro de certificados desde archivos y formularios.
+ * Procesa validaciones, duplicados y persistencia de certificados.
+ */
 public class CertifiedRegisterHandler implements RegisterHandler {
 
+    /** Controlador de persistencia para operaciones de certificados */
     public static final ControlCertified control = new ControlCertified();
 
-    // *Estructura para almacenar datos */
+    /** Validador singleton para verificar duplicados */
     ValidationArchive validator = ValidationArchive.getInstance();
 
+    /**
+     * Procesa una línea de certificado desde archivo de carga masiva.
+     * 
+     * @param linea     línea del archivo con datos del certificado
+     * @param logWriter escritor para registrar errores y éxitos
+     * @return true si el certificado se procesó correctamente
+     */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
@@ -50,30 +64,53 @@ public class CertifiedRegisterHandler implements RegisterHandler {
         }
     }
 
-    public boolean isValid(CertifiedModel certified) {
+    /**
+     * Inserta un certificado directamente desde formulario.
+     * 
+     * @param certified el certificado a insertar
+     * @return true si se insertó correctamente
+     */
+    public boolean insertFromForm(CertifiedModel certified) {
         try {
-            if (certified == null) {
-                return false;
-            }
-
-            if (!validateDataIntegrity(certified)) {
-                return false;
-            }
-
-            // *Validamos que no exista duplicado o el cupo esta lleno*/
-
-            if (control.insert(certified) != null)
-                return true;
-
-            return false;
-
-        } catch (Exception e) {
+            return control.insert(certified) != null;
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Valida los datos de un certificado desde formulario.
+     * 
+     * @param certified el certificado a validar
+     * @return "Ok" si es válido, mensaje de error si no
+     */
+    public String validateForm(CertifiedModel certified) {
+
+        if (certified == null) {
+            return "Certificado nulo.";
+        }
+
+        if (!validateDataIntegrity(certified)) {
+            return "Datos del certificado inválidos.";
+        }
+
+        String validationMessage = control.validateCertificate(certified);
+        if (!validationMessage.equals("Ok")) {
+            return validationMessage;
+        }
+
+        return "Ok";
 
     }
 
+    /**
+     * Valida la integridad de los datos del certificado usando expresiones
+     * regulares.
+     * 
+     * @param certified el certificado a validar
+     * @return true si todos los datos son válidos
+     */
     private boolean validateDataIntegrity(CertifiedModel certified) {
 
         boolean codigoEventoValido = certified.getCodigoEvento() != null &&

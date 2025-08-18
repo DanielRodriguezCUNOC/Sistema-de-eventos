@@ -2,25 +2,33 @@ package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.Set;
 import com.hyrule.Backend.RegularExpresion.RExpresionEvento;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.event.EventModel;
 import com.hyrule.Backend.persistence.event.ControlEvent;
 import com.hyrule.interfaces.RegisterHandler;
 
+/**
+ * Manejador para el registro de eventos desde archivos y formularios.
+ * Procesa validaciones, duplicados y persistencia en base de datos.
+ */
 public class EventRegisterHandler implements RegisterHandler {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    // * Creamos una instacia para ingresar los datos a la BD */
+    /** Controlador de persistencia para operaciones de eventos */
     private final ControlEvent control = new ControlEvent();
 
-    // *Estructura para almacenar los eventos */
+    /** Validador singleton para verificar duplicados */
     ValidationArchive validator = ValidationArchive.getInstance();
 
-    // *Metodo para procesar el registro de eventos desde el archivo */
+    /**
+     * Procesa una línea de evento desde archivo de carga masiva.
+     * 
+     * @param linea     línea del archivo con datos del evento
+     * @param logWriter escritor para registrar errores y éxitos
+     * @return true si el evento se procesó correctamente
+     */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
@@ -66,10 +74,24 @@ public class EventRegisterHandler implements RegisterHandler {
         }
     }
 
+    /**
+     * Inserta un evento directamente desde formulario.
+     * 
+     * @param event el evento a insertar
+     * @return true si se insertó correctamente
+     */
     public boolean insertFromForm(EventModel event) {
         return control.insert(event) != null;
     }
 
+    /**
+     * Valida los datos de un evento desde formulario.
+     * 
+     * @param event    el evento a validar
+     * @param fechaStr la fecha en formato string
+     * @param costoStr el costo en formato string
+     * @return "Ok" si es válido, mensaje de error si no
+     */
     public String validateForm(EventModel event, String fechaStr, String costoStr) {
         if (event == null) {
             return "El evento no puede ser nulo.";
@@ -88,7 +110,14 @@ public class EventRegisterHandler implements RegisterHandler {
 
     }
 
-    // *Validamos la integridad de los datos del formulario */
+    /**
+     * Valida la integridad de los datos del evento usando expresiones regulares.
+     * 
+     * @param evento   el evento a validar
+     * @param fechaStr la fecha en formato string
+     * @param costoStr el costo en formato string
+     * @return true si todos los datos son válidos
+     */
     private boolean validateDataIntegrity(EventModel evento, String fechaStr, String costoStr) {
 
         boolean codigoValido = evento.getCodigoEvento() != null &&

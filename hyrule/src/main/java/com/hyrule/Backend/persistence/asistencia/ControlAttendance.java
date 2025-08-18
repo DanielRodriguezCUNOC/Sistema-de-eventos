@@ -10,15 +10,30 @@ import com.hyrule.Backend.connection.DBConnection;
 import com.hyrule.Backend.model.asistencia.AttendanceModel;
 import com.hyrule.Backend.persistence.Control;
 
+/**
+ * Controlador de persistencia para operaciones CRUD de asistencias.
+ * Gestiona validaciones de cupo y registros de asistencia a actividades.
+ */
 public class ControlAttendance extends Control<AttendanceModel> {
 
+    /** Conexión a la base de datos */
     private DBConnection dbConnection;
 
+    /**
+     * Constructor que inicializa y conecta a la base de datos.
+     */
     public ControlAttendance() {
         this.dbConnection = new DBConnection();
         dbConnection.connect();
     }
 
+    /**
+     * Inserta una nueva asistencia en la base de datos.
+     * 
+     * @param entity la asistencia a insertar
+     * @return la asistencia insertada
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public AttendanceModel insert(AttendanceModel entity) throws SQLException {
 
@@ -38,31 +53,62 @@ public class ControlAttendance extends Control<AttendanceModel> {
 
     }
 
+    /**
+     * Actualiza una asistencia existente.
+     * 
+     * @param entity la asistencia con datos actualizados
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public void update(AttendanceModel entity) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
+    /**
+     * Elimina una asistencia por clave.
+     * 
+     * @param key la clave de la asistencia a eliminar
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public void delete(String key) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
+    /**
+     * Busca una asistencia por clave.
+     * 
+     * @param key la clave de búsqueda
+     * @return la asistencia encontrada o null
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public AttendanceModel findByKey(String key) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findByKey'");
     }
 
+    /**
+     * Obtiene todas las asistencias registradas.
+     * 
+     * @return lista de todas las asistencias
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public List<AttendanceModel> findAll() throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
-    // *Funcion para validar la actividad */
+    /**
+     * Valida una asistencia verificando duplicados y disponibilidad de cupo.
+     * 
+     * @param attendace la asistencia a validar
+     * @return "Ok" si es válida, mensaje de error si no
+     * @throws SQLException si ocurre un error en la consulta
+     */
     public String validateAttendance(AttendanceModel attendace) throws SQLException {
         if (existsAttendance(attendace)) {
             return "Este participante ya cuenta con asistencia en esta actividad.";
@@ -73,7 +119,13 @@ public class ControlAttendance extends Control<AttendanceModel> {
         return "Ok";
     }
 
-    // * Verificamos si la asistencia ya existe */
+    /**
+     * Verifica si ya existe asistencia para el participante en la actividad.
+     * 
+     * @param entity la asistencia a verificar
+     * @return true si ya existe, false si no
+     * @throws SQLException si ocurre un error en la consulta
+     */
     private boolean existsAttendance(AttendanceModel entity) throws SQLException {
         String sql = "SELECT 1 FROM asistencia WHERE correo_participante = ? AND codigo_actividad = ?";
         try (Connection connection = dbConnection.getConnection();
@@ -86,7 +138,13 @@ public class ControlAttendance extends Control<AttendanceModel> {
         }
     }
 
-    // * Verificamos si la actividad tiene cupo */
+    /**
+     * Verifica si la actividad tiene cupo disponible.
+     * 
+     * @param codigoActividad el código de la actividad a verificar
+     * @return true si tiene cupo disponible, false si está llena
+     * @throws SQLException si ocurre un error en la consulta
+     */
     private boolean hasCapacity(String codigoActividad) throws SQLException {
 
         String sql = "SELECT COUNT(*) as current_attendance, a.cupo_maximo " +

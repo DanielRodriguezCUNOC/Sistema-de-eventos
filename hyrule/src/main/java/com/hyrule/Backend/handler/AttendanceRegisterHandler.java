@@ -9,13 +9,25 @@ import com.hyrule.Backend.model.asistencia.AttendanceModel;
 import com.hyrule.Backend.persistence.asistencia.ControlAttendance;
 import com.hyrule.interfaces.RegisterHandler;
 
+/**
+ * Manejador para el registro de asistencias desde archivos y formularios.
+ * Procesa validaciones, duplicados y persistencia de asistencias a actividades.
+ */
 public class AttendanceRegisterHandler implements RegisterHandler {
 
+    /** Controlador de persistencia para operaciones de asistencias */
     public static final ControlAttendance control = new ControlAttendance();
 
-    // *Estructura para validacion de asistencia */
+    /** Validador singleton para verificar duplicados */
     ValidationArchive validator = ValidationArchive.getInstance();
 
+    /**
+     * Procesa una línea de asistencia desde archivo de carga masiva.
+     * 
+     * @param linea     línea del archivo con datos de la asistencia
+     * @param logWriter escritor para registrar errores y éxitos
+     * @return true si la asistencia se procesó correctamente
+     */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
@@ -53,6 +65,12 @@ public class AttendanceRegisterHandler implements RegisterHandler {
         }
     }
 
+    /**
+     * Inserta una asistencia directamente desde formulario.
+     * 
+     * @param attendance la asistencia a insertar
+     * @return true si se insertó correctamente
+     */
     public boolean insertFromForm(AttendanceModel attendance) {
 
         // * Insertamos la asistencia en la base de datos */
@@ -65,6 +83,12 @@ public class AttendanceRegisterHandler implements RegisterHandler {
 
     }
 
+    /**
+     * Valida los datos de una asistencia desde formulario.
+     * 
+     * @param attendance la asistencia a validar
+     * @return "Ok" si es válida, mensaje de error si no
+     */
     public String validateForm(AttendanceModel attendance) {
 
         if (attendance == null) {
@@ -90,6 +114,12 @@ public class AttendanceRegisterHandler implements RegisterHandler {
 
     }
 
+    /**
+     * Valida la integridad de los datos de asistencia usando expresiones regulares.
+     * 
+     * @param attendance la asistencia a validar
+     * @return true si todos los datos son válidos
+     */
     private boolean validateDataIntegrity(AttendanceModel attendance) {
 
         boolean correoValido = attendance.getCorreoParticipante() != null &&

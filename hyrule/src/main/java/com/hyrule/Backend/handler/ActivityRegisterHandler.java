@@ -9,16 +9,27 @@ import com.hyrule.Backend.model.activity.ActivityModel;
 import com.hyrule.Backend.persistence.activity.ControlActivity;
 import com.hyrule.interfaces.RegisterHandler;
 
+/**
+ * Manejador para el registro de actividades desde archivos y formularios.
+ * Procesa validaciones, duplicados y persistencia de actividades de eventos.
+ */
 public class ActivityRegisterHandler implements RegisterHandler {
 
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
-    // * Creamos una instancia para ingresar los datos a la BD */
+    /** Controlador de persistencia para operaciones de actividades */
     private final ControlActivity control = new ControlActivity();
 
-    // *Estructura para el registro de actividades */
+    /** Validador singleton para verificar duplicados y participantes */
     ValidationArchive validator = ValidationArchive.getInstance();
 
+    /**
+     * Procesa una línea de actividad desde archivo de carga masiva.
+     * 
+     * @param linea     línea del archivo con datos de la actividad
+     * @param logWriter escritor para registrar errores y éxitos
+     * @return true si la actividad se procesó correctamente
+     */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
         try {
@@ -35,6 +46,13 @@ public class ActivityRegisterHandler implements RegisterHandler {
             // *Validamos si la actividad ya existe o si el participante es asistente */
             if (validator.existsActivity(actividad.getCodigoActividad())) {
                 logWriter.write("La actividad ya existe: " + actividad.getCodigoActividad());
+                logWriter.newLine();
+                return false;
+
+            }
+
+            if (!validator.existsEvent(actividad.getCodigoEvento())) {
+                logWriter.write("El evento no existe: " + actividad.getCodigoEvento());
                 logWriter.newLine();
                 return false;
 
@@ -62,8 +80,12 @@ public class ActivityRegisterHandler implements RegisterHandler {
         }
     }
 
-    // *Registrar Actividad desde formulario y validar con la expresion regular */
-
+    /**
+     * Inserta una actividad directamente desde formulario.
+     * 
+     * @param activity la actividad a insertar
+     * @return true si se insertó correctamente
+     */
     public boolean insertFromForm(ActivityModel activity) {
         try {
             return control.insert(activity) != null;
@@ -73,6 +95,12 @@ public class ActivityRegisterHandler implements RegisterHandler {
         return false;
     }
 
+    /**
+     * Valida los datos de una actividad desde formulario.
+     * 
+     * @param activity la actividad a validar
+     * @return "Ok" si es válida, mensaje de error si no
+     */
     public String validateForm(ActivityModel activity) {
         if (activity == null) {
             return "La actividad no puede ser nula.";
@@ -91,7 +119,12 @@ public class ActivityRegisterHandler implements RegisterHandler {
 
     }
 
-    // *Validamos la integridad de los datos del formulario */
+    /**
+     * Valida la integridad de los datos de actividad usando expresiones regulares.
+     * 
+     * @param activity la actividad a validar
+     * @return true si todos los datos son válidos
+     */
     private boolean validateDataIntegrity(ActivityModel activity) {
 
         boolean codigoValido = activity.getCodigoActividad() != null &&

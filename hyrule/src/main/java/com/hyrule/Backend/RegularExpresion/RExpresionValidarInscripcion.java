@@ -1,17 +1,30 @@
 package com.hyrule.Backend.RegularExpresion;
 
+import java.util.regex.Pattern;
+
 import com.hyrule.Backend.model.validate_registration.ValidateRegistrationModel;
 
+/**
+ * Clase para parsear líneas de validación de inscripciones usando expresiones
+ * regulares.
+ * Extrae y valida datos de validaciones desde texto en formato específico.
+ */
 public class RExpresionValidarInscripcion {
 
-    // *Expresion regular para validar el correo */
-    public static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    /** Expresión regular para validar el correo electrónico */
+    public static final Pattern EMAIL = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
-    // *Expresion regular para validar el codigo de evento */
-    public static final String CODIGO_EVENTO = "^EVT-\\d{8}$";
+    /** Expresión regular para validar el código de evento */
+    public static final Pattern CODIGO_EVENTO = Pattern.compile("^EVT-\\d{8}$");
 
-    // *Funcion para validar los datos de inscripcion */
-
+    /**
+     * Parsea una línea de texto para extraer datos de validación de inscripción.
+     * 
+     * @param linea línea en formato VALIDAR_INSCRIPCION(...) con datos de
+     *              validación
+     * @return ValidateRegistrationModel con los datos parseados o null si es
+     *         inválida
+     */
     public ValidateRegistrationModel parseValidateRegistration(String linea) {
         if (!linea.startsWith("VALIDAR_INSCRIPCION") || !linea.endsWith(");")) {
             return null;
@@ -37,11 +50,10 @@ public class RExpresionValidarInscripcion {
             // *Eliminamos las comillas */
             String valor = parte.replaceAll("^\"|\"$", "").trim();
 
-            if (CODIGO_EVENTO.matches(valor)) {
+            if (CODIGO_EVENTO.matcher(valor).matches()) {
                 codigoEvento = valor;
-            } else if (EMAIL.matches(valor)) {
+            } else if (EMAIL.matcher(valor).matches()) {
                 correo = valor;
-
             }
         }
 
@@ -53,6 +65,12 @@ public class RExpresionValidarInscripcion {
         return null;
     }
 
+    /**
+     * Divide los argumentos de entrada por comas respetando las comillas.
+     * 
+     * @param input la cadena de argumentos a dividir
+     * @return array de argumentos separados
+     */
     private String[] splitArgs(String input) {
         // *Divide los argumentos por comas*/
         return input.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);

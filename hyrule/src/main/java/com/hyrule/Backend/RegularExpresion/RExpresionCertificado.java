@@ -1,16 +1,27 @@
 package com.hyrule.Backend.RegularExpresion;
 
+import java.util.regex.Pattern;
+
 import com.hyrule.Backend.model.certified.CertifiedModel;
 
+/**
+ * Clase para parsear líneas de certificados usando expresiones regulares.
+ * Extrae y valida datos de certificados desde texto en formato específico.
+ */
 public class RExpresionCertificado {
 
-    // *Expresion regular para validar el codigo del evento */
-    private static final String CODIGO_EVENTO = "^EVT-\\d{8}$";
+    /** Expresión regular para validar el código del evento */
+    private static final Pattern CODIGO_EVENTO = Pattern.compile("^EVT-\\d{8}$");
 
-    // *Expresion regular para validar el correo */
-    private static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    /** Expresión regular para validar el correo electrónico */
+    private static final Pattern EMAIL = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
-    // *Funcion para validar el registro de certificado */
+    /**
+     * Parsea una línea de texto para extraer datos de certificado.
+     * 
+     * @param linea línea en formato CERTIFICADO(...) con datos de certificado
+     * @return CertifiedModel con los datos parseados o null si es inválida
+     */
     public CertifiedModel parseCertified(String linea) {
 
         if (!linea.startsWith("CERTIFICADO") || !linea.endsWith(");")) {
@@ -34,9 +45,9 @@ public class RExpresionCertificado {
         for (String parte : partes) {
             String valor = parte.replaceAll("^\"|\"$", "").trim();
 
-            if (CODIGO_EVENTO.matches(valor)) {
+            if (CODIGO_EVENTO.matcher(valor).matches()) {
                 codigoEvento = valor;
-            } else if (EMAIL.matches(valor)) {
+            } else if (EMAIL.matcher(valor).matches()) {
                 correo = valor;
             }
         }
@@ -49,6 +60,12 @@ public class RExpresionCertificado {
         return null;
     }
 
+    /**
+     * Divide los argumentos de entrada por comas respetando las comillas.
+     * 
+     * @param input la cadena de argumentos a dividir
+     * @return array de argumentos separados
+     */
     private String[] splitArgs(String input) {
         // *Divide los argumentos por comas*/
         return input.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);

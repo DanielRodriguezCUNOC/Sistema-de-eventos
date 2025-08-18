@@ -1,22 +1,32 @@
 package com.hyrule.Backend.RegularExpresion;
 
 import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
 import com.hyrule.Backend.model.payment.PaymentModel;
 import com.hyrule.Backend.model.payment.PaymentType;
 
+/**
+ * Clase para parsear líneas de pagos usando expresiones regulares.
+ * Extrae y valida datos de pagos desde texto en formato específico.
+ */
 public class RExpresionPago {
 
-    // *Expresion regular para validar el codigo de pago */
-    public static final String CODIGO_EVENTO = "^EVT-\\d{8}$";
+    /** Expresión regular para validar el código de evento */
+    public static final Pattern CODIGO_EVENTO = Pattern.compile("^EVT-\\d{8}$");
 
-    // *Expresion regular para validar el monto */
-    public static final String MONTO = "^(\\d+)(\\.\\d{1,2})?$";
+    /** Expresión regular para validar el monto del pago */
+    public static final Pattern MONTO = Pattern.compile("^(\\d+)(\\.\\d{1,2})?$");
 
-    // *Expresion regular para validar el correo */
-    public static final String EMAIL = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    /** Expresión regular para validar el correo electrónico */
+    public static final Pattern EMAIL = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
-    // *Funcion para validar el tipo de inscripcion */
+    /**
+     * Parsea una línea de texto para extraer datos de pago.
+     * 
+     * @param linea línea en formato REGISTRO_PAGO(...) con datos del pago
+     * @return PaymentModel con los datos parseados o null si es inválida
+     */
     public PaymentModel parsePayment(String linea) {
         if (!linea.startsWith("REGISTRO_PAGO") || !linea.endsWith(");")) {
             return null;
@@ -45,11 +55,11 @@ public class RExpresionPago {
             // *Eliminamos las comillas */
             String valor = parte.replaceAll("^\"|\"$", "").trim();
 
-            if (CODIGO_EVENTO.matches(valor)) {
+            if (CODIGO_EVENTO.matcher(valor).matches()) {
                 codigoEvento = valor;
-            } else if (EMAIL.matches(valor)) {
+            } else if (EMAIL.matcher(valor).matches()) {
                 correo = valor;
-            } else if (MONTO.matches(valor)) {
+            } else if (MONTO.matcher(valor).matches()) {
                 monto = new BigDecimal(valor);
             } else if (isPaymentType(valor)) {
                 tipoPago = PaymentType.valueOf(valor);
@@ -66,7 +76,12 @@ public class RExpresionPago {
         return null;
     }
 
-    // *Metodo para convertir el tipo de evento */
+    /**
+     * Verifica si una cadena corresponde a un tipo de pago válido.
+     * 
+     * @param paymentType la cadena a verificar
+     * @return true si es un tipo válido, false si no
+     */
     private boolean isPaymentType(String paymentType) {
         for (PaymentType type : PaymentType.values()) {
             if (type.name().equals(paymentType)) {
@@ -76,6 +91,12 @@ public class RExpresionPago {
         return false;
     }
 
+    /**
+     * Divide los argumentos de entrada por comas respetando las comillas.
+     * 
+     * @param input la cadena de argumentos a dividir
+     * @return array de argumentos separados
+     */
     private String[] splitArgs(String input) {
         // *Divide los argumentos por comas*/
         return input.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);

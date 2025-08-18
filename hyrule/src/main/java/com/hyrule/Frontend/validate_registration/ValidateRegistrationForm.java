@@ -17,7 +17,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ValidateRegistrationForm extends JInternalFrame {
 
@@ -130,22 +129,29 @@ public class ValidateRegistrationForm extends JInternalFrame {
     }
 
     private void validarRegistro(int row) {
-        String correo = table.getValueAt(row, 0).toString();
-        String codigoEvento = table.getValueAt(row, 1).toString();
-        try {
-            ValidateRegistrationModel registro = new ValidateRegistrationModel(correo, codigoEvento);
-            ValidateInscripcionRegisterHandler handler = new ValidateInscripcionRegisterHandler();
-            if (handler.isValid(registro)) {
 
-                JOptionPane.showMessageDialog(this, "Inscripción validada correctamente.",
+        String correo = (String) tableModel.getValueAt(row, 0);
+
+        String codigoEvento = (String) tableModel.getValueAt(row, 1);
+
+        ValidateRegistrationModel registro = new ValidateRegistrationModel(correo, codigoEvento);
+
+        ValidateInscripcionRegisterHandler validator = new ValidateInscripcionRegisterHandler();
+
+        String resultado = validator.validateForm(registro);
+        if ("Ok".equals(resultado)) {
+            if (validator.insertFromForm(registro)) {
+                JOptionPane.showMessageDialog(this, "Inscripción validada exitosamente.",
                         "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                cargarDatos(); // Recargar datos después de validar
+
+                cargarDatos();
             } else {
-                JOptionPane.showMessageDialog(this, "Error al validar inscripción.",
+                JOptionPane.showMessageDialog(this, "Error al validar la inscripción.",
                         "Error", JOptionPane.ERROR_MESSAGE);
+
             }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al validar inscripción: " + ex.getMessage(),
+        } else {
+            JOptionPane.showMessageDialog(this, resultado,
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

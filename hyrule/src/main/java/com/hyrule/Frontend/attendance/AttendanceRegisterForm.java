@@ -202,27 +202,35 @@ public class AttendanceRegisterForm extends JInternalFrame {
     }
 
     private void registrarAsistencia() {
-        try {
-            AttendanceModel attendance = new AttendanceModel(
-                    txtCorreo.getText().trim(),
-                    txtCodigoActividad.getText().trim());
-            AttendanceRegisterHandler handler = new AttendanceRegisterHandler();
-            if (!handler.isValid(attendance)) {
+
+        String correo = txtCorreo.getText().trim();
+        String codigoActividad = txtCodigoActividad.getText().trim();
+
+        AttendanceModel attendance = new AttendanceModel(correo, codigoActividad);
+
+        AttendanceRegisterHandler validator = new AttendanceRegisterHandler();
+
+        String validationMsg = validator.validateForm(attendance);
+
+        if ("Ok".equals(validationMsg)) {
+            if (validator.insertFromForm(attendance)) {
                 JOptionPane.showMessageDialog(this,
-                        "Error en el registro de asistencia.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+                        "Asistencia registrada correctamente.",
+                        "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
-                        "Asistencia registrada exitosamente.",
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                limpiarCampos();
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Ocurrió un error al registrar la asistencia: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
+                        "Error al registrar la asistencia. Intente nuevamente.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
 
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    validationMsg,
+                    "Error de validación",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

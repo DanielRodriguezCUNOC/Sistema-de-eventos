@@ -10,15 +10,30 @@ import com.hyrule.Backend.connection.DBConnection;
 import com.hyrule.Backend.model.certified.CertifiedModel;
 import com.hyrule.Backend.persistence.Control;
 
+/**
+ * Controlador de persistencia para operaciones CRUD de certificados.
+ * Gestiona validaciones de asistencia y registros de certificados.
+ */
 public class ControlCertified extends Control<CertifiedModel> {
 
+    /** Conexión a la base de datos */
     private DBConnection dbConnection;
 
+    /**
+     * Constructor que inicializa y conecta a la base de datos.
+     */
     public ControlCertified() {
         this.dbConnection = new DBConnection();
         dbConnection.connect();
     }
 
+    /**
+     * Inserta un nuevo certificado en la base de datos.
+     * 
+     * @param entity el certificado a insertar
+     * @return el certificado insertado
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public CertifiedModel insert(CertifiedModel entity) throws SQLException {
 
@@ -36,30 +51,61 @@ public class ControlCertified extends Control<CertifiedModel> {
         return entity;
     }
 
+    /**
+     * Actualiza un certificado existente.
+     * 
+     * @param entity el certificado con datos actualizados
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public void update(CertifiedModel entity) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
+    /**
+     * Elimina un certificado por clave.
+     * 
+     * @param key la clave del certificado a eliminar
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public void delete(String key) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
+    /**
+     * Busca un certificado por clave.
+     * 
+     * @param key la clave de búsqueda
+     * @return el certificado encontrado o null
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public CertifiedModel findByKey(String key) throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findByKey'");
     }
 
+    /**
+     * Obtiene todos los certificados registrados.
+     * 
+     * @return lista de todos los certificados
+     * @throws SQLException si ocurre un error en la base de datos
+     */
     @Override
     public List<CertifiedModel> findAll() throws SQLException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
+    /**
+     * Valida un certificado verificando asistencia y duplicados.
+     * 
+     * @param certified el certificado a validar
+     * @return "Ok" si es válido, mensaje de error si no
+     */
     public String validateCertificate(CertifiedModel certified) {
 
         if (!certificateExists(certified)) {
@@ -80,7 +126,13 @@ public class ControlCertified extends Control<CertifiedModel> {
         return "Ok";
     }
 
-    // *Funcion para saber si un participante asistio a una actividad */
+    /**
+     * Verifica si el participante asistió a alguna actividad del evento.
+     * 
+     * @param entity el certificado con datos del participante y evento
+     * @return true si asistió, false si no
+     * @throws SQLException si ocurre un error en la consulta
+     */
     private boolean existsAttendance(CertifiedModel entity) throws SQLException {
         String query = "SELECT COUNT(*) FROM asistencia a " +
                 "JOIN actividad ac ON a.codigo_actividad = ac.codigo_actividad " +
@@ -106,9 +158,12 @@ public class ControlCertified extends Control<CertifiedModel> {
         return false;
     }
 
-    // *Funcion para validar el certificado */
-
-    // *Funcion para validar si el certificado ya existe */
+    /**
+     * Verifica si ya existe un certificado para el participante y evento.
+     * 
+     * @param entity el certificado a verificar
+     * @return true si ya existe, false si no
+     */
     private boolean certificateExists(CertifiedModel entity) {
         String query = "SELECT COUNT(*) FROM certificado WHERE codigo_evento = ? AND correo_participante = ?";
 
