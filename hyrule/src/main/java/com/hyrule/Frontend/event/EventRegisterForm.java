@@ -32,7 +32,7 @@ public class EventRegisterForm extends JInternalFrame {
 
         super("", true, true, true, true);
         this.adminView = adminView;
-        adminView.setTitle("Registro de Eventos");
+        adminView.setTitle("Registrar Evento");
 
         setLayout(new BorderLayout());
         setSize(1000, 750);
