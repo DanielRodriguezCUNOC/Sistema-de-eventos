@@ -2,6 +2,7 @@ package com.hyrule.Frontend;
 
 import java.awt.*;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.sql.Connection;
 
 import javax.imageio.ImageIO;
@@ -255,6 +256,21 @@ public class AdminModule extends JFrame {
         desktopPane.add(validateModule);
         centrarInternalFrame(validateModule);
         validateModule.setVisible(true);
+    }
+
+    /**
+     * Muestra el módulo de procesamiento de archivos con parámetros personalizables
+     * 
+     * @param filePath      ruta del archivo a procesar
+     * @param logFolderPath ruta donde se guardarán los reportes
+     * @param delay         velocidad de procesamiento en milisegundos
+     */
+    public void mostrarProcesamentArchiveModule(Path filePath, Path logFolderPath, int delay) {
+        cerrarVentanas();
+        ShowProcessArchive processModule = new ShowProcessArchive(filePath, logFolderPath, delay, this);
+        desktopPane.add(processModule);
+        centrarInternalFrame(processModule);
+        processModule.setVisible(true);
     }
 
     public void cerrarVentanas() {
