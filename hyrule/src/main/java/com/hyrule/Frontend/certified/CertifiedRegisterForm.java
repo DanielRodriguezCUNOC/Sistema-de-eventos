@@ -127,8 +127,7 @@ public class CertifiedRegisterForm extends JInternalFrame {
 
         btnCancelar = createModernButton("Cancelar", new Color(220, 53, 69));
 
-        btnRegresar = createModernButton("Regresar", new Color(108, 117, 125));
-        btnRegresar.setBackground(new Color(108, 117, 125));
+        btnRegresar = createModernButton("⬅️ Regresar", new Color(252, 141, 18));
 
         configurarAccionesBotones();
 
