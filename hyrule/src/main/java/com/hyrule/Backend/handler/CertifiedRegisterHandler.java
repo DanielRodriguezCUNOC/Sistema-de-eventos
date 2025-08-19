@@ -24,15 +24,14 @@ public class CertifiedRegisterHandler implements RegisterHandler {
     private Connection conn;
 
     CertifiedCreator certifiedCreator;
-    private Path filePath;
+    private Path directoryPath;
 
     /**
      * Constructor que recibe la conexión a la base de datos.
      */
-    public CertifiedRegisterHandler(Connection conn, Path filePath) {
+    public CertifiedRegisterHandler(Connection conn) {
         this.conn = conn;
         this.certifiedCreator = new CertifiedCreator();
-        this.filePath = filePath;
     }
 
     /** Validador singleton para verificar duplicados */
@@ -66,7 +65,7 @@ public class CertifiedRegisterHandler implements RegisterHandler {
             if (control.insert(certified, conn) != null) {
                 validator.addCertificado(certified);
                 if (!"Ok".equals(certifiedCreator.createCertificateFromArchive(certified.getCorreoParticipante(),
-                        certified.getCodigoEvento(), filePath))) {
+                        certified.getCodigoEvento(), directoryPath))) {
                     logWriter.error("Error al generar el certificado para: " + certified.getCorreoParticipante());
                     return false;
                 }
@@ -146,6 +145,10 @@ public class CertifiedRegisterHandler implements RegisterHandler {
                 && !certified.getCorreoParticipante().isBlank();
 
         return codigoEventoValido && correoValido;
+    }
+
+    public void setDirectoryPath(Path directoryPath) {
+        this.directoryPath = directoryPath;
     }
 
 }
