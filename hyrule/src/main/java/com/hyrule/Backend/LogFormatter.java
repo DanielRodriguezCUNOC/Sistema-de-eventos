@@ -9,12 +9,12 @@ import java.time.format.DateTimeFormatter;
  * Formateador de logs para escribir mensajes con timestamp
  */
 public class LogFormatter {
-    private final BufferedWriter writer;
-    private final DateTimeFormatter timestampFormat;
+    private final BufferedWriter WRITER;
+    private final DateTimeFormatter TIMESTAMPFORMATTER;
 
-    public LogFormatter(BufferedWriter writer) {
-        this.writer = writer;
-        this.timestampFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    public LogFormatter(BufferedWriter WRITER) {
+        this.WRITER = WRITER;
+        this.TIMESTAMPFORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     }
 
     public void info(String message) throws IOException {
@@ -26,11 +26,11 @@ public class LogFormatter {
     }
 
     private void write(String level, String message) throws IOException {
-        writer.write(String.format("[%s] [%s] %s",
-                LocalDateTime.now().format(timestampFormat),
+        WRITER.write(String.format("[%s] [%s] %s",
+                LocalDateTime.now().format(TIMESTAMPFORMATTER),
                 level,
                 message));
-        writer.newLine();
-        writer.flush();
+        WRITER.newLine();
+        WRITER.flush();
     }
 }
