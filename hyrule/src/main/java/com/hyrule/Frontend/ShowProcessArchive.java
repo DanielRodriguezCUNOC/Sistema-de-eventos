@@ -114,13 +114,14 @@ public class ShowProcessArchive extends JInternalFrame {
 
         new Thread(() -> {
             try {
-                ProcessorArchive processor = new ProcessorArchive();
-                processor.processWithThread(filePath, logFolderPath, delay,
-                        () -> SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(adminView,
-                                "Procesamiento completado.",
-                                "Proceso Completo",
-                                JOptionPane.INFORMATION_MESSAGE)));
 
+                new Thread(() -> {
+                    startFileReading(filePath);
+                }).start();
+
+                processor.processWithThread(filePath, logFolderPath, delay,
+                        () -> SwingUtilities.invokeLater(() -> onProcessingComplete()));
+                startLogReading(processor.getFileLogGenerado());
             } catch (Exception e) {
                 SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(adminView,
@@ -152,30 +153,31 @@ public class ShowProcessArchive extends JInternalFrame {
             }
         }).start();
 
-        startFileReading();
-        startLogReading(processor.getFileLogGenerado());
-
+        // startFileReading();
     }
 
     /**
      * Inicia la lectura del archivo para mostrar su contenido en tiempo real.
      */
-    private void startFileReading() {
+    private void startFileReading(Path filePath) {
         new Thread(() -> {
             try (BufferedReader br = Files.newBufferedReader(filePath)) {
                 String linea;
 
                 while ((linea = br.readLine()) != null) {
                     String finalLinea = linea;
-                    SwingUtilities.invokeLater(() -> {
-                        fileContentArea.append(finalLinea + "\n");
-                        try {
-                            Thread.sleep(delay);
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                        }
-                    });
+                    SwingUtilities.invokeLater(() -> fileContentArea.append(finalLinea + "\n"));
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+
                 }
+                JOptionPane.showMessageDialog(adminView,
+                        "Lectura del archivo completada.",
+                        "Lectura Completa",
+                        JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
                 SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(adminView,
@@ -193,16 +195,20 @@ public class ShowProcessArchive extends JInternalFrame {
             try (BufferedReader br = Files.newBufferedReader(logFilePath)) {
                 String linea;
 
-                while ((linea = br.readLine()) != null) {
-                    String finalLinea = linea;
-                    SwingUtilities.invokeLater(() -> {
-                        logArea.append(finalLinea + "\n");
+                while (true) {
+                    linea = br.readLine();
+                    if (linea != null) {
+                        String finalLinea = linea;
+                        SwingUtilities.invokeLater(() -> logArea.append(finalLinea + "\n"));
+                    } else {
                         try {
                             Thread.sleep(delay);
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
+                            break;
                         }
-                    });
+                    }
+
                 }
             } catch (IOException e) {
                 SwingUtilities.invokeLater(() -> {
@@ -214,5 +220,11 @@ public class ShowProcessArchive extends JInternalFrame {
             }
         }).start();
 
+    }
+
+    private void onProcessingComplete() {
+        SwingUtilities.invokeLater(() -> {
+            logArea.append(">>> Procesamiento completado.\n");
+        });
     }
 }

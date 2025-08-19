@@ -77,7 +77,7 @@ public class ProcessorArchive {
         Path fileLog = generateFile(logFilePath);
 
         try {
-            Files.createDirectories(fileLog);
+            Files.createDirectories(fileLog.getParent());
         } catch (IOException e) {
             throw new RuntimeException("No se pudo crear el directorio para los logs." + fileLog, e);
 
@@ -170,6 +170,8 @@ public class ProcessorArchive {
     }
 
     public Path generateFile(Path carpetaLog) {
+
+        carpetaLog = carpetaLog.resolve("logs");
 
         String fileLog = "log_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".log";
         setFileLogGenerado(carpetaLog.resolve(fileLog));
