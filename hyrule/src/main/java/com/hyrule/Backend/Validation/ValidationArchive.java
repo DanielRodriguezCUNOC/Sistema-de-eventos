@@ -486,4 +486,16 @@ public class ValidationArchive {
         return ASISTENCIA;
     }
 
+    public Set<PaymentModel> getPagos() {
+        return PAGO;
+    }
+
+    public Set<RegistrationModel> getInscripciones() {
+        return INSCRIPCION;
+    }
+
+    public Set<ValidateRegistrationModel> getValidarInscripciones() {
+        return VALIDAR_INSCRIPCION;
+    }
+
 }

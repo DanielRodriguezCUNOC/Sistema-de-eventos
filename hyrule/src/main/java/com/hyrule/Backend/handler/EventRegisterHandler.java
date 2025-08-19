@@ -150,10 +150,10 @@ public class EventRegisterHandler implements RegisterHandler {
                 evento.getTipoEvento().name().matches("^(CHARLA|CONGRESO|TALLER|DEBATE)$");
 
         boolean tituloValido = evento.getTituloEvento() != null &&
-                evento.getTituloEvento().matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9\\-\\s]{1,150}$");
+                evento.getTituloEvento().matches("^[\\p{L}\\p{N}\\-\\s]{1,100}$");
 
         boolean ubicacionValida = evento.getUbicacionEvento() != null &&
-                evento.getUbicacionEvento().matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.,()\\-\\s]{1,150}$")
+                evento.getUbicacionEvento().matches("^[\\p{L}\\p{N}\\-\\s]{1,150}$")
                 && !evento.getUbicacionEvento().isBlank();
 
         boolean cupoValido = evento.getCupoMaxParticipantes() != null &&

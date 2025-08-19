@@ -59,7 +59,7 @@ public class ProcessorArchive {
 
         HANDLER.put("INSCRIPCION", new InscripcionRegisterHandler(getConnection()));
 
-        HANDLER.put("CERTIFICADO", new CertifiedRegisterHandler(getConnection(), getFileLogGenerado()));
+        HANDLER.put("CERTIFICADO", new CertifiedRegisterHandler(getConnection()));
 
         HANDLER.put("VALIDAR_INSCRIPCION", new ValidateInscripcionRegisterHandler(getConnection()));
 
@@ -69,13 +69,16 @@ public class ProcessorArchive {
 
     }
 
-    public void processWithThread(Path filePath, Path logFilePath, int delay, Runnable onComplete) {
+    public void processWithThread(Path filePath, Path reportDirectoryPath, int delay, Runnable onComplete) {
 
         if (isRunning) {
             throw new IllegalStateException("El procesador ya está en ejecución.");
         }
 
-        Path fileLog = generateFile(logFilePath);
+        Path fileLog = generateFile(reportDirectoryPath);
+
+        CertifiedRegisterHandler certifiedHandler = (CertifiedRegisterHandler) HANDLER.get("CERTIFICADO");
+        certifiedHandler.setDirectoryPath(reportDirectoryPath);
 
         try {
             Files.createDirectories(fileLog.getParent());
