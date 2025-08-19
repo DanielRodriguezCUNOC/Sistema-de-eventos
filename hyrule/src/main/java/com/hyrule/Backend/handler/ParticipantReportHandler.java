@@ -89,10 +89,6 @@ public class ParticipantReportHandler implements RegisterHandler {
         return "Ok";
     }
 
-    public void setDirectoryPath(Path directoryPath) {
-        this.directoryPath = directoryPath;
-    }
-
     private boolean validateDataIntegrity(String codigoEvento, String tipoParticipante,
             String institucion) {
 
@@ -109,6 +105,10 @@ public class ParticipantReportHandler implements RegisterHandler {
 
         return codigoEventoValido && isValidType && isValidInstitution;
 
+    }
+
+    public void setDirectoryPath(Path directoryPath) {
+        this.directoryPath = directoryPath;
     }
 
 }
