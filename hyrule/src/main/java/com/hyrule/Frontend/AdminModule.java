@@ -26,6 +26,7 @@ public class AdminModule extends JFrame {
     private JPanel sidebar;
     private Connection connection;
     private DBConnection dbConnection;
+    private Path directoryPath;
 
     public AdminModule() {
         setTitle("Sistema de Administración de Eventos");
@@ -290,5 +291,13 @@ public class AdminModule extends JFrame {
 
     public Connection getConnection() {
         return connection;
+    }
+
+    public Path getDirectoryPath() {
+        return directoryPath;
+    }
+
+    public void setDirectoryPath(Path directoryPath) {
+        this.directoryPath = directoryPath;
     }
 }
