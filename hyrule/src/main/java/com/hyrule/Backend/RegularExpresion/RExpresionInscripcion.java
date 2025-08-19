@@ -27,12 +27,12 @@ public class RExpresionInscripcion {
     public RegistrationModel parseRegistration(String linea) {
 
         // Verificamos que tenga el formato básico
-        if (!linea.startsWith("REGISTRO_INSCRIPCION") || !linea.endsWith(");")) {
+        if (!linea.startsWith("INSCRIPCION") || !linea.endsWith(");")) {
             return null;
         }
 
         // Eliminamos el prefijo y sufijo
-        String contenido = linea.substring("REGISTRO_INSCRIPCION(".length(), linea.length() - 2).trim();
+        String contenido = linea.substring("INSCRIPCION(".length(), linea.length() - 2).trim();
 
         // Dividimos respetando comillas
         String[] partes = splitArgs(contenido);
