@@ -30,7 +30,7 @@ public class UploadArchiveFrame extends JInternalFrame {
     private AdminModule adminView;
     private JSpinner spinnerDelay;
     private JTextField textFieldReportPath;
-    private Path reportPath = Paths.get(System.getProperty("user.home.Documentos"), "reportes");
+    private Path reportPath = Paths.get(System.getProperty("user.home"), "reportes");
 
     public UploadArchiveFrame(AdminModule adminView) {
         super("", true, true, true, true);
