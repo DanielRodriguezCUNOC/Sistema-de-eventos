@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.participant;
 
+/**
+ * Modelo de datos para participantes en eventos
+ */
 public class ParticipantModel {
 
     private String correo_participante;

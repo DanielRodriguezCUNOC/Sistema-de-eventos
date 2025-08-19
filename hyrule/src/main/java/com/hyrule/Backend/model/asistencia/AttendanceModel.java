@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.asistencia;
 
+/**
+ * Modelo de datos para registro de asistencia a actividades
+ */
 public class AttendanceModel {
     private String codigoActividad;
     private String correoParticipante;

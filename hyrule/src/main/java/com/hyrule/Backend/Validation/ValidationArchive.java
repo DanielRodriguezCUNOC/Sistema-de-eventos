@@ -3,6 +3,7 @@ package com.hyrule.Backend.Validation;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.hyrule.Backend.model.activity.ActivityModel;
@@ -133,14 +134,17 @@ public class ValidationArchive {
      * @throws IllegalArgumentException si ocurre un error durante la verificación
      */
     public boolean existsEvent(String eventCode) {
+        if (eventCode == null || EVENTOS == null) {
+            return false;
+        }
+
         try {
-            for (EventModel event : EVENTOS) {
-                return event.getCodigoEvento().equals(eventCode);
-            }
+            return EVENTOS.stream()
+                    .filter(Objects::nonNull)
+                    .anyMatch(event -> eventCode.equals(event.getCodigoEvento()));
         } catch (Exception e) {
             throw new IllegalArgumentException("Error al verificar la existencia del evento: " + e.getMessage());
         }
-        return false;
     }
 
     /**
@@ -279,16 +283,18 @@ public class ValidationArchive {
      * @throws IllegalArgumentException si ocurre un error durante la verificación
      */
     public boolean existsRegistration(String codeEvent, String participantEmail) {
-        try {
-            for (RegistrationModel registration : INSCRIPCION) {
-                return registration.getCodigoEvento().equals(codeEvent)
-                        && registration.getCorreoParticipante().equals(participantEmail);
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error al verificar la existencia de la inscripción: " + e
-                    .getMessage());
+        if (codeEvent == null || participantEmail == null || INSCRIPCION == null) {
+            return false;
         }
-        return false;
+
+        try {
+            return INSCRIPCION.stream()
+                    .filter(Objects::nonNull)
+                    .anyMatch(registration -> codeEvent.equals(registration.getCodigoEvento()) &&
+                            participantEmail.equals(registration.getCorreoParticipante()));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error al verificar la existencia de la inscripción: " + e.getMessage());
+        }
     }
 
     // ========== Funcionalidades para Certificados ==========

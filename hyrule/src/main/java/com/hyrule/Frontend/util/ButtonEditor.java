@@ -1,10 +1,14 @@
 package com.hyrule.Frontend.util;
 
 import javax.swing.*;
+import javax.swing.table.TableCellEditor;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Editor de botones para celdas de tabla con funcionalidad personalizada
+ */
 public class ButtonEditor extends DefaultCellEditor {
 
     private JButton button;

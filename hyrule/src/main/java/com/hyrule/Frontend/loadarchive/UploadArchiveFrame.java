@@ -24,6 +24,9 @@ import java.nio.file.Paths;
 
 import com.hyrule.Frontend.AdminModule;
 
+/**
+ * Interfaz para cargar y procesar archivos de datos
+ */
 public class UploadArchiveFrame extends JInternalFrame {
 
     private JPanel panel;

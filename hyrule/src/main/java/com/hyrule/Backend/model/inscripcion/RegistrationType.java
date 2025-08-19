@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.inscripcion;
 
+/**
+ * Tipos de registro disponibles para inscripciones
+ */
 public enum RegistrationType {
     ASISTENTE,
     CONFERENCISTA,

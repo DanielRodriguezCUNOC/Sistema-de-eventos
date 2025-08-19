@@ -16,6 +16,9 @@ import com.hyrule.Frontend.AdminModule;
 
 import javax.swing.border.TitledBorder;
 
+/**
+ * Formulario para registro de actividades en eventos
+ */
 public class ActivityRegisterForm extends JInternalFrame {
 
     private JTextField txtCodigoActividad;

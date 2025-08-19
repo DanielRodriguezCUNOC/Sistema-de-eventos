@@ -9,6 +9,9 @@ import java.awt.event.ActionListener;
 import com.hyrule.Backend.handler.ParticipantReportHandler;
 import com.hyrule.Frontend.AdminModule;
 
+/**
+ * Formulario para generar reportes de participantes
+ */
 public class ParticipantReportForm extends JInternalFrame {
 
     private JTextField txtCodigoEvento;

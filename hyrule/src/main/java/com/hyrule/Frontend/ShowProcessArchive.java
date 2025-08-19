@@ -9,6 +9,9 @@ import java.nio.file.Path;
 
 import com.hyrule.Backend.archiveprocessor.ProcessorArchive;
 
+/**
+ * Interfaz para mostrar el procesamiento de archivos
+ */
 public class ShowProcessArchive extends JInternalFrame {
 
     private JTextArea fileContentArea;

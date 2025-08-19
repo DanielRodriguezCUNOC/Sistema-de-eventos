@@ -48,6 +48,7 @@ public class ActivityRegisterHandler implements RegisterHandler {
 
             // *Validamos la linea con la expresion regular */
             RExpresionActividad parser = new RExpresionActividad();
+
             ActivityModel actividad = parser.parseActivity(linea.trim());
             if (actividad == null) {
                 logWriter.error("Línea inválida o incompleta: " + linea);

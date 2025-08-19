@@ -12,6 +12,9 @@ import com.hyrule.Frontend.AdminModule;
 
 import javax.swing.border.TitledBorder;
 
+/**
+ * Formulario para registro de inscripciones a eventos
+ */
 public class InscripcionRegisterForm extends JInternalFrame {
 
     private JTextField txtCorreoParticipante;

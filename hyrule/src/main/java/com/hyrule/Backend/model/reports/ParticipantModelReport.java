@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.reports;
 
+/**
+ * Modelo de datos para reportes de participantes
+ */
 public class ParticipantModelReport {
     private String correoParticipante;
     String tipoParticipante;

@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.validate_registration;
 
+/**
+ * Modelo de datos para validación de inscripciones
+ */
 public class ValidateRegistrationModel {
     private String correo;
     private String codigoEvento;

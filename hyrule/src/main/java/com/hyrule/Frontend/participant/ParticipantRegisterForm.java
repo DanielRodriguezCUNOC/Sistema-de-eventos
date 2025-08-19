@@ -10,6 +10,9 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
+/**
+ * Formulario para registro de participantes
+ */
 public class ParticipantRegisterForm extends JInternalFrame {
 
     private JTextField txtCorreo;

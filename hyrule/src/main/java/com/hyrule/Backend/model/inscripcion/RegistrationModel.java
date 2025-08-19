@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.inscripcion;
 
+/**
+ * Modelo de datos para inscripciones a eventos
+ */
 public class RegistrationModel {
     private String correoParticipante;
     private String codigoEvento;

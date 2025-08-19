@@ -2,6 +2,9 @@ package com.hyrule.Backend.model.payment;
 
 import java.math.BigDecimal;
 
+/**
+ * Modelo de datos para pagos de eventos
+ */
 public class PaymentModel {
 
     private String codigoEvento;

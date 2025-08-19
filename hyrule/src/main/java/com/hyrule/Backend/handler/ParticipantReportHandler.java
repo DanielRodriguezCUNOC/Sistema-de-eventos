@@ -12,6 +12,9 @@ import com.hyrule.Backend.persistence.reports.ReportParticipantControl;
 import com.hyrule.Backend.reports.ParticipantReportCreator;
 import com.hyrule.interfaces.RegisterHandler;
 
+/**
+ * Manejador para procesamiento de reportes de participantes
+ */
 public class ParticipantReportHandler implements RegisterHandler {
 
     private Path directoryPath;
