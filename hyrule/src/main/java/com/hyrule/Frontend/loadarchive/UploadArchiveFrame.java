@@ -151,6 +151,7 @@ public class UploadArchiveFrame extends JInternalFrame {
         int result = dirChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             reportPath = dirChooser.getSelectedFile().toPath();
+            adminView.setDirectoryPath(reportPath);
             textFieldReportPath.setText(reportPath.toString());
         }
     }

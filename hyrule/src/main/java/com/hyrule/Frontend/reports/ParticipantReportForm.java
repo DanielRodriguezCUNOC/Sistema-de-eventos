@@ -1,30 +1,31 @@
-package com.hyrule.Frontend.certified;
+package com.hyrule.Frontend.reports;
 
-import com.hyrule.Frontend.AdminModule;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-import com.hyrule.Backend.model.certified.CertifiedModel;
-import com.hyrule.Backend.handler.CertifiedRegisterHandler;
+import com.hyrule.Backend.handler.ParticipantReportHandler;
+import com.hyrule.Frontend.AdminModule;
 
-public class CertifiedRegisterForm extends JInternalFrame {
+public class ParticipantReportForm extends JInternalFrame {
 
-    private JTextField txtCorreo;
     private JTextField txtCodigoEvento;
-    private JLabel lblCorreo;
+    private JTextField txtTipoParticipante;
+    private JTextField txtInstitucion;
     private JLabel lblCodigoEvento;
-    private JButton btnRegistrar;
+    private JLabel lblTipoParticipante;
+    private JLabel lblInstitucion;
+    private JButton btnGenerar;
     private JButton btnCancelar;
     private JButton btnRegresar;
     private AdminModule adminView;
 
-    public CertifiedRegisterForm(AdminModule adminView) {
+    public ParticipantReportForm(AdminModule adminView) {
         super("", true, true, true, true);
         this.adminView = adminView;
-        adminView.setTitle("Registro de Certificados");
+        adminView.setTitle("Reporte de Participantes");
 
         setLayout(new BorderLayout());
         setSize(1000, 750);
@@ -114,40 +115,48 @@ public class CertifiedRegisterForm extends JInternalFrame {
 
         Font labelFont = new Font("SansSerif", Font.BOLD, 16);
 
-        lblCorreo = new JLabel("Correo del participante:");
-        lblCorreo.setFont(labelFont);
-        txtCorreo = createStyledTextField("Ingrese el correo del participante");
-        txtCorreo.setPreferredSize(new Dimension(250, 35));
-
-        lblCodigoEvento = new JLabel("Código de la actividad:");
+        lblCodigoEvento = new JLabel("Código del evento:");
         lblCodigoEvento.setFont(labelFont);
-        txtCodigoEvento = createStyledTextField("Ingrese el código de la actividad");
+        txtCodigoEvento = createStyledTextField("Ingrese el código del evento");
         txtCodigoEvento.setPreferredSize(new Dimension(250, 35));
 
-        btnRegistrar = createModernButton("Registrar", new Color(100, 149, 237));
+        lblTipoParticipante = new JLabel("Tipo de participante:");
+        lblTipoParticipante.setFont(labelFont);
+        txtTipoParticipante = createStyledTextField("Ingrese el tipo de participante (opcional)");
+        txtTipoParticipante.setPreferredSize(new Dimension(250, 35));
 
+        lblInstitucion = new JLabel("Institución:");
+        lblInstitucion.setFont(labelFont);
+        txtInstitucion = createStyledTextField("Ingrese la institución (opcional)");
+        txtInstitucion.setPreferredSize(new Dimension(250, 35));
+
+        btnGenerar = createModernButton("Generar Reporte", new Color(100, 149, 237));
         btnCancelar = createModernButton("Cancelar", new Color(220, 53, 69));
-
         btnRegresar = createModernButton("⬅️ Regresar", new Color(252, 141, 18));
 
         configurarAccionesBotones();
 
-        // Ubicar componentes
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(lblCorreo, gbc);
-        gbc.gridx = 1;
-        panel.add(txtCorreo, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
         panel.add(lblCodigoEvento, gbc);
         gbc.gridx = 1;
         panel.add(txtCodigoEvento, gbc);
 
         gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(lblTipoParticipante, gbc);
+        gbc.gridx = 1;
+        panel.add(txtTipoParticipante, gbc);
+
+        gbc.gridx = 0;
         gbc.gridy = 2;
-        panel.add(btnRegistrar, gbc);
+        panel.add(lblInstitucion, gbc);
+        gbc.gridx = 1;
+        panel.add(txtInstitucion, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        panel.add(btnGenerar, gbc);
         gbc.gridx = 1;
         panel.add(btnCancelar, gbc);
         gbc.gridx = 2;
@@ -165,15 +174,15 @@ public class CertifiedRegisterForm extends JInternalFrame {
     }
 
     private void configurarAccionesBotones() {
-        btnRegistrar.setActionCommand("REGISTRAR");
+        btnGenerar.setActionCommand("GENERAR");
         btnCancelar.setActionCommand("CANCELAR");
         btnRegresar.setActionCommand("REGRESAR");
 
         ActionListener actionListener = e -> {
             String command = e.getActionCommand();
             switch (command) {
-                case "REGISTRAR":
-                    registrarCertificado();
+                case "GENERAR":
+                    generarReporte();
                     break;
                 case "CANCELAR":
                     limpiarCampos();
@@ -187,49 +196,40 @@ public class CertifiedRegisterForm extends JInternalFrame {
             }
         };
 
-        btnRegistrar.addActionListener(actionListener);
+        btnGenerar.addActionListener(actionListener);
         btnCancelar.addActionListener(actionListener);
         btnRegresar.addActionListener(actionListener);
     }
 
     private void limpiarCampos() {
-        txtCorreo.setText("");
         txtCodigoEvento.setText("");
+        txtTipoParticipante.setText("");
+        txtInstitucion.setText("");
         JOptionPane.showMessageDialog(this,
                 "Formulario limpiado.",
                 "Información",
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void registrarCertificado() {
+    private void generarReporte() {
 
-        String correo = txtCorreo.getText().trim();
         String codigoEvento = txtCodigoEvento.getText().trim();
+        String tipoParticipante = txtTipoParticipante.getText().trim();
+        String institucion = txtInstitucion.getText().trim();
 
-        CertifiedModel certified = new CertifiedModel(correo, codigoEvento);
-
-        CertifiedRegisterHandler validator = new CertifiedRegisterHandler(adminView.getConnection());
-
-
-        String validationMsg = validator.validateForm(certified);
-        if ("Ok".equals(validationMsg)) {
-            if (validator.insertFromForm(certified, adminView.getDirectoryPath())) {
-                JOptionPane.showMessageDialog(this,
-                        "Certificado registrado correctamente.",
-                        "Registro Exitoso",
-                        JOptionPane.INFORMATION_MESSAGE);
-                limpiarCampos();
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Error al registrar el certificado.",
-                        "Error de Registro",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+        ParticipantReportHandler reportHandler = new ParticipantReportHandler(adminView.getConnection());
+        if (reportHandler.generarReporteForm(codigoEvento, tipoParticipante, institucion)) {
+            JOptionPane.showMessageDialog(this,
+                    "Reporte generado exitosamente.",
+                    "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this,
-                    validationMsg,
-                    "Error de Validación",
-                    JOptionPane.WARNING_MESSAGE);
+                    "Error al generar el reporte.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
+
     }
+
 }

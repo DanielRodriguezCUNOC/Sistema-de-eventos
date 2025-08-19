@@ -26,6 +26,7 @@ public class AdminModule extends JFrame {
     private JPanel sidebar;
     private Connection connection;
     private DBConnection dbConnection;
+    private Path directoryPath;
 
     public AdminModule() {
         setTitle("Sistema de Administración de Eventos");
@@ -122,7 +123,7 @@ public class AdminModule extends JFrame {
     private void mostrarVistaInicio() {
         cerrarVentanas();
 
-        try (InputStream imgStream = getClass().getResourceAsStream("/com/hyrule/resources/images/fondo.png")) {
+        try (InputStream imgStream = getClass().getClassLoader().getResourceAsStream("images/fondo.png")) {
             if (imgStream != null) {
                 Image imagen = ImageIO.read(imgStream);
                 JPanel panelInicio = new JPanel() {
@@ -290,5 +291,13 @@ public class AdminModule extends JFrame {
 
     public Connection getConnection() {
         return connection;
+    }
+
+    public Path getDirectoryPath() {
+        return directoryPath;
+    }
+
+    public void setDirectoryPath(Path directoryPath) {
+        this.directoryPath = directoryPath;
     }
 }
