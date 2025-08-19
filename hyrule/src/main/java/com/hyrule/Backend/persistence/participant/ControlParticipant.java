@@ -34,8 +34,8 @@ public class ControlParticipant extends Control<ParticipantModel> {
             conn.setAutoCommit(false);
 
             try {
-                pstmt.setString(1, entity.getCorreo_participante());
-                pstmt.setString(2, entity.getNombre_completo());
+                pstmt.setString(1, entity.getCorreoParticipante());
+                pstmt.setString(2, entity.getNombreCompleto());
                 pstmt.setString(3, entity.getTipoParticipante().name());
                 pstmt.setString(4, entity.getInstitucion());
 
@@ -71,10 +71,10 @@ public class ControlParticipant extends Control<ParticipantModel> {
         String query = "UPDATE participante SET nombre_completo = ?, tipo_participante = ?, institucion = ? WHERE correo_participante = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, entity.getNombre_completo());
+            pstmt.setString(1, entity.getNombreCompleto());
             pstmt.setString(2, entity.getTipoParticipante().name());
             pstmt.setString(3, entity.getInstitucion());
-            pstmt.setString(4, entity.getCorreo_participante());
+            pstmt.setString(4, entity.getCorreoParticipante());
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {
@@ -164,10 +164,10 @@ public class ControlParticipant extends Control<ParticipantModel> {
      */
     public String validateParticipant(ParticipantModel participant, Connection conn) {
 
-        if (emailExists(participant.getCorreo_participante(), conn)) {
+        if (emailExists(participant.getCorreoParticipante(), conn)) {
             return "Hay un participante registrado con el mismo correo electrónico.";
         }
-        if (nameExists(participant.getNombre_completo(), conn)) {
+        if (nameExists(participant.getNombreCompleto(), conn)) {
             return "Hay un participante registrado con el mismo nombre.";
         }
         return "Ok";
@@ -184,7 +184,7 @@ public class ControlParticipant extends Control<ParticipantModel> {
     public boolean emailExists(String email, Connection conn) {
         try {
             for (ParticipantModel participant : findAll(conn)) {
-                if (participant.getCorreo_participante().equals(email)) {
+                if (participant.getCorreoParticipante().equals(email)) {
                     return true;
                 }
             }
@@ -205,7 +205,7 @@ public class ControlParticipant extends Control<ParticipantModel> {
     public boolean nameExists(String name, Connection conn) {
         try {
             for (ParticipantModel participant : findAll(conn)) {
-                if (participant.getNombre_completo().equals(name)) {
+                if (participant.getNombreCompleto().equals(name)) {
                     return true;
                 }
             }

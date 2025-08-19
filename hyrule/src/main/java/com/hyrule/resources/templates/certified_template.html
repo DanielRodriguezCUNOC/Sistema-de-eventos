@@ -1,0 +1,115 @@
+<html>
+    <head>
+        <style type='text/css'>
+            body, html {
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                color: black;
+                font-family: Georgia, serif;
+                font-size: 24px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+            }
+            .certificate-wrapper {
+                margin: 20px 0;
+            }
+            .container {
+                border: 20px solid tan;
+                width: 750px;
+                height: 563px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            .logo {
+                color: tan;
+            }
+            .marquee {
+                color: tan;
+                font-size: 48px;
+                margin: 20px;
+            }
+            .assignment {
+                margin: 20px;
+            }
+            .person {
+                border-bottom: 2px solid black;
+                font-size: 32px;
+                font-style: italic;
+                margin: 20px auto;
+                width: 400px;
+            }
+            .reason {
+                margin: 20px;
+            }
+            #downloadBtn {
+                background-color: tan;
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                font-size: 18px;
+                cursor: pointer;
+                border-radius: 5px;
+                margin-top: 30px;
+                transition: background-color 0.3s;
+            }
+            #downloadBtn:hover {
+                background-color: #b38b6d;
+            }
+        </style>
+        <!-- Incluye la librería html2pdf.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    </head>
+    <body>
+        <div class="certificate-wrapper">
+            <div class="container" id="certificate">
+                <div class="logo">
+                    An Organization
+                </div>
+
+                <div class="marquee">
+                    Certificate of Completion
+                </div>
+
+                <div class="assignment">
+                    This certificate is presented to
+                </div>
+
+                <div class="person">
+                    Joe Nathan
+                </div>
+
+                <div class="reason">
+                    For deftly defying the laws of gravity<br/>
+                    and flying high
+                </div>
+            </div>
+            
+            <button id="downloadBtn">Download as PDF</button>
+        </div>
+
+        <script>
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                const element = document.getElementById('certificate');
+                
+                // Configuración de html2pdf
+                const opt = {
+                    margin: 10,
+                    filename: 'certificado.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Generar el PDF
+                html2pdf().set(opt).from(element).save();
+            });
+        </script>
+    </body>
+</html>

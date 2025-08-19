@@ -1,13 +1,15 @@
 package com.hyrule.Backend.handler;
 
 import java.io.BufferedWriter;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
-
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionCertificado;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.certified.CertifiedModel;
 import com.hyrule.Backend.persistence.certified.ControlCertified;
+import com.hyrule.Backend.reports.CertifiedCreator;
 import com.hyrule.interfaces.RegisterHandler;
 
 /**
@@ -22,11 +24,16 @@ public class CertifiedRegisterHandler implements RegisterHandler {
     /** Conexión a la base de datos. */
     private Connection conn;
 
+    CertifiedCreator certifiedCreator;
+    private Path filePath;
+
     /**
      * Constructor que recibe la conexión a la base de datos.
      */
-    public CertifiedRegisterHandler(Connection conn) {
+    public CertifiedRegisterHandler(Connection conn, Path filePath) {
         this.conn = conn;
+        this.certifiedCreator = new CertifiedCreator();
+        this.filePath = filePath;
     }
 
     /** Validador singleton para verificar duplicados */
@@ -41,34 +48,36 @@ public class CertifiedRegisterHandler implements RegisterHandler {
      */
     @Override
     public boolean process(String linea, BufferedWriter logWriter) {
+        LogFormatter logFormatter = new LogFormatter(logWriter);
         try {
-
             RExpresionCertificado parser = new RExpresionCertificado();
             CertifiedModel certified = parser.parseCertified(linea.trim());
             if (certified == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
-                logWriter.newLine();
+                logFormatter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
 
             // *Validamos si el certificado ya existe */
             if (validator.existsCertificado(certified.getCorreoParticipante(), certified.getCodigoEvento())) {
-                logWriter.write("El certificado ya existe para el participante: " + certified.getCorreoParticipante()
+                logFormatter.error("El certificado ya existe para el participante: " + certified.getCorreoParticipante()
                         + " en el evento: " + certified.getCodigoEvento());
-                logWriter.newLine();
                 return false;
             }
 
-            // *Agregamos los datos al HashSet */
-            validator.addCertificado(certified);
-
-            // * Insertamos el certificado en la base de datos */
-            return control.insert(certified, conn) != null;
+            if (control.insert(certified, conn) != null) {
+                validator.addCertificado(certified);
+                if (!"Ok".equals(certifiedCreator.createCertificateFromArchive(certified.getCorreoParticipante(),
+                        certified.getCodigoEvento(), filePath))) {
+                    logFormatter.error("Error al generar el certificado para: " + certified.getCorreoParticipante());
+                    return false;
+                }
+                logFormatter.info("Certificado registrado y generado: " + certified);
+            }
+            return true;
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
-                logWriter.newLine();
+                logFormatter.error("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;
@@ -81,9 +90,15 @@ public class CertifiedRegisterHandler implements RegisterHandler {
      * @param certified el certificado a insertar
      * @return true si se insertó correctamente
      */
-    public boolean insertFromForm(CertifiedModel certified) {
+    public boolean insertFromForm(CertifiedModel certified, Path filePath) {
         try {
-            return control.insert(certified, conn) != null;
+            if (control.insert(certified, conn) != null) {
+                certifiedCreator.createCertificateFromForm(
+                        certified.getCodigoEvento(), certified.getCorreoParticipante(), conn, control, filePath);
+                return true;
+            } else {
+                return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

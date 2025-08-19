@@ -50,7 +50,7 @@ public class ProcessorArchive {
 
         HANDLER.put("INSCRIPCION", new InscripcionRegisterHandler(getConnection()));
 
-        HANDLER.put("CERTIFICADO", new CertifiedRegisterHandler(getConnection()));
+        HANDLER.put("CERTIFICADO", new CertifiedRegisterHandler(getConnection(), getFileLogGenerado()));
 
         HANDLER.put("VALIDAR_INSCRIPCION", new ValidateInscripcionRegisterHandler(getConnection()));
 

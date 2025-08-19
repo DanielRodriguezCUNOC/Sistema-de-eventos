@@ -6,6 +6,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.File;
+
 import com.hyrule.Backend.model.certified.CertifiedModel;
 import com.hyrule.Backend.handler.CertifiedRegisterHandler;
 
@@ -172,7 +174,7 @@ public class CertifiedRegisterForm extends JInternalFrame {
             String command = e.getActionCommand();
             switch (command) {
                 case "REGISTRAR":
-                    registrarAsistencia();
+                    registrarCertificado();
                     break;
                 case "CANCELAR":
                     limpiarCampos();
@@ -200,18 +202,27 @@ public class CertifiedRegisterForm extends JInternalFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void registrarAsistencia() {
+    private void registrarCertificado() {
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Seleccionar archivo");
+        File selectedFile = null;
+        int userSelection = fileChooser.showOpenDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            selectedFile = fileChooser.getSelectedFile();
+        }
 
         String correo = txtCorreo.getText().trim();
         String codigoEvento = txtCodigoEvento.getText().trim();
 
         CertifiedModel certified = new CertifiedModel(correo, codigoEvento);
 
-        CertifiedRegisterHandler validator = new CertifiedRegisterHandler(adminView.getConnection());
+        CertifiedRegisterHandler validator = new CertifiedRegisterHandler(adminView.getConnection(),
+                selectedFile.toPath());
 
         String validationMsg = validator.validateForm(certified);
         if (!"Ok".equals(validationMsg)) {
-            if (validator.insertFromForm(certified)) {
+            if (validator.insertFromForm(certified, selectedFile.toPath())) {
                 JOptionPane.showMessageDialog(this,
                         "Certificado registrado correctamente.",
                         "Registro Exitoso",
