@@ -209,7 +209,7 @@ public class CertifiedRegisterForm extends JInternalFrame {
         CertifiedModel certified = new CertifiedModel(correo, codigoEvento);
 
         CertifiedRegisterHandler validator = new CertifiedRegisterHandler(adminView.getConnection());
-        validator.setDirectoryPath(adminView.getDirectoryPath());
+
 
         String validationMsg = validator.validateForm(certified);
         if ("Ok".equals(validationMsg)) {

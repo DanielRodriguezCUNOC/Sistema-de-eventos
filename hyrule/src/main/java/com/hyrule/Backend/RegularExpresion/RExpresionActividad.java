@@ -62,9 +62,9 @@ public class RExpresionActividad {
         }
 
         try {
-            // Asignación posicional de cada campo
-            String codigoEvento = partes[0].replaceAll("^\"|\"$", "").trim();
-            String codigoActividad = partes[1].replaceAll("^\"|\"$", "").trim();
+
+            String codigoActividad = partes[0].replaceAll("^\"|\"$", "").trim();
+            String codigoEvento = partes[1].replaceAll("^\"|\"$", "").trim();
             ActivityType tipo = ActivityType.valueOf(partes[2].replaceAll("^\"|\"$", "").trim());
             String titulo = partes[3].replaceAll("^\"|\"$", "").trim();
             String correoPonente = partes[4].replaceAll("^\"|\"$", "").trim();
@@ -72,7 +72,6 @@ public class RExpresionActividad {
             LocalTime horaFin = LocalTime.parse(partes[6].replaceAll("^\"|\"$", "").trim(), TIME_FORMAT);
             Integer cupo = Integer.parseInt(partes[7].trim());
 
-            // Validaciones básicas con regex (opcional, pero recomendable)
             if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
                 return null;
             if (!CODIGO_ACTIVIDAD.matcher(codigoActividad).matches())

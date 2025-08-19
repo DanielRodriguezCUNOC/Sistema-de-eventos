@@ -40,10 +40,10 @@ public class RExpresionParticipante {
         }
 
         try {
-            String correo = partes[0].replaceAll("^\"|\"$", "").trim();
-            String nombre = partes[1].replaceAll("^\"|\"$", "").trim();
-            ParticipantType tipoParticipante = ParticipantType.valueOf(partes[2].replaceAll("^\"|\"$", "").trim());
-            String institucion = partes[3].replaceAll("^\"|\"$", "").trim();
+            String nombre = partes[0].replaceAll("^\"|\"$", "").trim();
+            ParticipantType tipoParticipante = ParticipantType.valueOf(partes[1].replaceAll("^\"|\"$", "").trim());
+            String institucion = partes[2].replaceAll("^\"|\"$", "").trim();
+            String correo = partes[3].replaceAll("^\"|\"$", "").trim();
 
             if (!EMAIL.matcher(correo).matches())
                 return null;

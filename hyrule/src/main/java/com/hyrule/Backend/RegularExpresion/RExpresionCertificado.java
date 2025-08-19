@@ -41,21 +41,17 @@ public class RExpresionCertificado {
         }
 
         try {
-            // Asignación posicional de cada campo
-            String codigoEvento = partes[0].replaceAll("^\"|\"$", "").trim();
-            String correo = partes[1].replaceAll("^\"|\"$", "").trim();
+            String correo = partes[0].replaceAll("^\"|\"$", "").trim();
+            String codigoEvento = partes[1].replaceAll("^\"|\"$", "").trim();
 
-            // Validaciones básicas con regex
             if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
                 return null;
             if (!EMAIL.matcher(correo).matches())
                 return null;
 
-            // Creamos y devolvemos el certificado
             return new CertifiedModel(codigoEvento, correo);
 
         } catch (Exception e) {
-            // Cualquier error de parseo devuelve null
             return null;
         }
     }
