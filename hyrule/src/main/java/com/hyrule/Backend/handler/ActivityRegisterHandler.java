@@ -1,9 +1,10 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
+
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionActividad;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.activity.ActivityModel;
@@ -42,49 +43,47 @@ public class ActivityRegisterHandler implements RegisterHandler {
      * @return true si la actividad se procesó correctamente
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
+    public boolean process(String linea, LogFormatter logWriter) {
         try {
 
             // *Validamos la linea con la expresion regular */
             RExpresionActividad parser = new RExpresionActividad();
-            ActivityModel actividad = parser.parseEvent(linea.trim());
+            ActivityModel actividad = parser.parseActivity(linea.trim());
             if (actividad == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
-                logWriter.newLine();
+                logWriter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
 
             // *Validamos si la actividad ya existe o si el participante es asistente */
             if (validator.existsActivity(actividad.getCodigoActividad())) {
-                logWriter.write("La actividad ya existe: " + actividad.getCodigoActividad());
-                logWriter.newLine();
+                logWriter.error("La actividad ya existe: " + actividad.getCodigoActividad());
                 return false;
 
             }
 
             if (!validator.existsEvent(actividad.getCodigoEvento())) {
-                logWriter.write("El evento no existe: " + actividad.getCodigoEvento());
-                logWriter.newLine();
+                logWriter.error("El evento no existe: " + actividad.getCodigoEvento());
                 return false;
 
             }
 
             if (validator.isAsistente(actividad.getCorreo())) {
-                logWriter.write("El participante esta registrado como asistente: " + actividad.getCorreo());
-                logWriter.newLine();
+                logWriter.error("El participante esta registrado como asistente: " + actividad.getCorreo());
                 return false;
             }
 
-            // *Agregamos los datos al HashSet */
-            validator.addActividad(actividad);
-
-            // * Insertamos la actividad en la base de datos */
-            return control.insert(actividad, conn) != null;
+            if (control.insert(actividad, conn) != null) {
+                logWriter.info("Actividad registrada: " + actividad.getCodigoActividad());
+                validator.addActividad(actividad);
+                return true;
+            } else {
+                logWriter.error("No se pudo insertar la actividad: " + actividad.getCodigoActividad());
+                return false;
+            }
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando REGISTRO_ACTIVIDAD: " + e.getMessage());
-                logWriter.newLine();
+                logWriter.error("Excepción procesando REGISTRO_ACTIVIDAD: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;

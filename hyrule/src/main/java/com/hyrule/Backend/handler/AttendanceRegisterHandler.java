@@ -1,9 +1,9 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionAsistencia;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.asistencia.AttendanceModel;
@@ -38,36 +38,36 @@ public class AttendanceRegisterHandler implements RegisterHandler {
      * @return true si la asistencia se procesó correctamente
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
+    public boolean process(String linea, LogFormatter logWriter) {
         try {
 
             // *Validamos la linea con la expresion regular */
             RExpresionAsistencia parser = new RExpresionAsistencia();
             AttendanceModel attendance = parser.parseAttendance(linea.trim());
             if (attendance == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
-                logWriter.newLine();
+                logWriter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
 
             // *Validamos si la asistencia ya existe */
             if (validator.existsAttendance(attendance.getCorreoParticipante(), attendance.getCodigoActividad())) {
-                logWriter.write("La asistencia ya existe para el participante: " + attendance.getCorreoParticipante()
+                logWriter.error("La asistencia ya existe para el participante: " + attendance.getCorreoParticipante()
                         + " en la actividad: " + attendance.getCodigoActividad());
-                logWriter.newLine();
                 return false;
             }
 
-            // *Agregamos los datos al HashSet */
-            validator.addAsistencia(attendance);
-
-            // * Insertamos la asistencia en la base de datos */
-            return control.insert(attendance, conn) != null;
+            if (control.insert(attendance, conn) != null) {
+                logWriter.info("Asistencia registrada: " + attendance.getCorreoParticipante());
+                validator.addAsistencia(attendance);
+                return true;
+            } else {
+                logWriter.error("No se pudo insertar la asistencia: " + attendance.getCorreoParticipante());
+                return false;
+            }
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
-                logWriter.newLine();
+                logWriter.error("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;

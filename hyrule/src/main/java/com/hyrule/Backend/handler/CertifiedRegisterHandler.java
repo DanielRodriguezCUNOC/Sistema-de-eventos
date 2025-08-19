@@ -1,6 +1,5 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -47,19 +46,19 @@ public class CertifiedRegisterHandler implements RegisterHandler {
      * @return true si el certificado se procesó correctamente
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
-        LogFormatter logFormatter = new LogFormatter(logWriter);
+    public boolean process(String linea, LogFormatter logWriter) {
+
         try {
             RExpresionCertificado parser = new RExpresionCertificado();
             CertifiedModel certified = parser.parseCertified(linea.trim());
             if (certified == null) {
-                logFormatter.error("Línea inválida o incompleta: " + linea);
+                logWriter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
 
             // *Validamos si el certificado ya existe */
             if (validator.existsCertificado(certified.getCorreoParticipante(), certified.getCodigoEvento())) {
-                logFormatter.error("El certificado ya existe para el participante: " + certified.getCorreoParticipante()
+                logWriter.error("El certificado ya existe para el participante: " + certified.getCorreoParticipante()
                         + " en el evento: " + certified.getCodigoEvento());
                 return false;
             }
@@ -68,16 +67,16 @@ public class CertifiedRegisterHandler implements RegisterHandler {
                 validator.addCertificado(certified);
                 if (!"Ok".equals(certifiedCreator.createCertificateFromArchive(certified.getCorreoParticipante(),
                         certified.getCodigoEvento(), filePath))) {
-                    logFormatter.error("Error al generar el certificado para: " + certified.getCorreoParticipante());
+                    logWriter.error("Error al generar el certificado para: " + certified.getCorreoParticipante());
                     return false;
                 }
-                logFormatter.info("Certificado registrado y generado: " + certified);
+                logWriter.info("Certificado registrado y generado: " + certified);
             }
             return true;
 
         } catch (Exception e) {
             try {
-                logFormatter.error("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
+                logWriter.error("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;

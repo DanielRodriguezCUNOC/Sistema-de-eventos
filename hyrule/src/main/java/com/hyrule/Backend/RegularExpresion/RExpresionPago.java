@@ -28,67 +28,42 @@ public class RExpresionPago {
      * @return PaymentModel con los datos parseados o null si es inválida
      */
     public PaymentModel parsePayment(String linea) {
+
+        // Verificamos que tenga el formato básico
         if (!linea.startsWith("REGISTRO_PAGO") || !linea.endsWith(");")) {
             return null;
         }
 
-        // *Eliminamos el prefijo y sufijo */
+        // Eliminamos el prefijo y sufijo
         String contenido = linea.substring("REGISTRO_PAGO(".length(), linea.length() - 2).trim();
 
-        // * Dividimos la linea por comas */
+        // Dividimos respetando comillas
         String[] partes = splitArgs(contenido);
 
-        // *Verificamos que tengan la cantidad de datos sea la correcta */
-
-        if (partes.length != 3) {
+        // Debe haber exactamente 4 partes
+        if (partes.length != 4) {
             return null;
         }
 
-        String correo = null;
-        String codigoEvento = null;
-        BigDecimal monto = null;
-        PaymentType tipoPago = null;
+        try {
+            // * Asignación posicional de cada campo y eliminación de comillas y espacios*/
+            String correo = partes[0].replaceAll("^\"|\"$", "").trim();
+            String codigoEvento = partes[1].replaceAll("^\"|\"$", "").trim();
+            PaymentType tipoPago = PaymentType.valueOf(partes[2].replaceAll("^\"|\"$", "").trim());
+            BigDecimal monto = new BigDecimal(partes[3].trim());
 
-        // *Ciclo para identificar el tipo de dato */
-        for (String parte : partes) {
+            if (!EMAIL.matcher(correo).matches())
+                return null;
+            if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
+                return null;
+            if (!MONTO.matcher(partes[3].trim()).matches())
+                return null;
 
-            // *Eliminamos las comillas */
-            String valor = parte.replaceAll("^\"|\"$", "").trim();
-
-            if (CODIGO_EVENTO.matcher(valor).matches()) {
-                codigoEvento = valor;
-            } else if (EMAIL.matcher(valor).matches()) {
-                correo = valor;
-            } else if (MONTO.matcher(valor).matches()) {
-                monto = new BigDecimal(valor);
-            } else if (isPaymentType(valor)) {
-                tipoPago = PaymentType.valueOf(valor);
-
-            }
-
-        }
-
-        // *Verificamos que todos los datos hayan sido reconocidos */
-        if (correo != null && codigoEvento != null && monto != null) {
             return new PaymentModel(correo, codigoEvento, tipoPago, monto);
-        }
 
-        return null;
-    }
-
-    /**
-     * Verifica si una cadena corresponde a un tipo de pago válido.
-     * 
-     * @param paymentType la cadena a verificar
-     * @return true si es un tipo válido, false si no
-     */
-    private boolean isPaymentType(String paymentType) {
-        for (PaymentType type : PaymentType.values()) {
-            if (type.name().equals(paymentType)) {
-                return true;
-            }
+        } catch (Exception e) {
+            return null;
         }
-        return false;
     }
 
     /**

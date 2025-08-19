@@ -24,40 +24,40 @@ public class RExpresionCertificado {
      */
     public CertifiedModel parseCertified(String linea) {
 
+        // Verificamos que tenga el formato básico
         if (!linea.startsWith("CERTIFICADO") || !linea.endsWith(");")) {
             return null;
         }
-        // *Eliminamos el prefijo y sufijo */
+
+        // Eliminamos el prefijo y sufijo
         String contenido = linea.substring("CERTIFICADO(".length(), linea.length() - 2).trim();
 
-        // * Dividimos la linea por comas */
+        // Dividimos respetando comillas
         String[] partes = splitArgs(contenido);
 
-        // *Verificamos que tengan la cantidad de datos sea la correcta */
+        // Debe haber exactamente 2 partes
         if (partes.length != 2) {
             return null;
         }
 
-        String correo = null;
-        String codigoEvento = null;
+        try {
+            // Asignación posicional de cada campo
+            String codigoEvento = partes[0].replaceAll("^\"|\"$", "").trim();
+            String correo = partes[1].replaceAll("^\"|\"$", "").trim();
 
-        // *Ciclo para identificar el tipo de dato */
-        for (String parte : partes) {
-            String valor = parte.replaceAll("^\"|\"$", "").trim();
+            // Validaciones básicas con regex
+            if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
+                return null;
+            if (!EMAIL.matcher(correo).matches())
+                return null;
 
-            if (CODIGO_EVENTO.matcher(valor).matches()) {
-                codigoEvento = valor;
-            } else if (EMAIL.matcher(valor).matches()) {
-                correo = valor;
-            }
-        }
-
-        // *Verificamos que todos los datos hayan sido reconocidos */
-        if (correo != null && codigoEvento != null) {
+            // Creamos y devolvemos el certificado
             return new CertifiedModel(codigoEvento, correo);
-        }
 
-        return null;
+        } catch (Exception e) {
+            // Cualquier error de parseo devuelve null
+            return null;
+        }
     }
 
     /**

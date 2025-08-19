@@ -1,6 +1,7 @@
 package com.hyrule.Backend.RegularExpresion;
 
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -24,10 +25,10 @@ public class RExpresionEvento {
     public static final Pattern FECHA_EVENTO = Pattern.compile("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/([0-9]{4})$");
 
     /** Expresión regular para validar el título del evento */
-    public static final Pattern TITULO_EVENTO = Pattern.compile("^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9\\-\\s]{1,150}$");
+    public static final Pattern TITULO_EVENTO = Pattern.compile("^[\\p{L}\\p{N}\\-\\s]{1,100}$");
 
     /** Expresión regular para validar la ubicación del evento */
-    public static final Pattern UBICACION_EVENTO = Pattern.compile("^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9.,()\\-\\s]{1,150}$");
+    public static final Pattern UBICACION_EVENTO = Pattern.compile("^[\\p{L}\\p{N}.,()\\-\\s]{1,150}$");
 
     /** Expresión regular para validar el cupo máximo de participantes */
     public static final Pattern CUPO_MAX_PARTICIPANTES = Pattern.compile("^(\\d+)$");
@@ -45,57 +46,46 @@ public class RExpresionEvento {
 
         if (!linea.startsWith("REGISTRO_EVENTO") || !linea.endsWith(");")) {
             return null;
-
         }
 
-        // *Eliminamos el prefijo y sufijo */
         String contenido = linea.substring("REGISTRO_EVENTO(".length(), linea.length() - 2).trim();
+        contenido = Normalizer.normalize(contenido, Normalizer.Form.NFC);
 
-        // * Dividimos la linea por comas */
         String[] partes = splitArgs(contenido);
-
-        // *Verificamos que tengan la cantidad de datos sea la correcta */
 
         if (partes.length != 7) {
             return null;
         }
 
-        String codigo = null;
-        LocalDate fechaStr = null;
-        EventType tipoStr = null;
-        String titulo = null;
-        String ubicacion = null;
-        Integer cupoStr = null;
-        BigDecimal costoStr = null;
+        try {
 
-        // *Ciclo para reconocer el tipo de dato por si viene desordenado */
-        for (String parte : partes) {
+            String codigo = partes[0].replaceAll("^\"|\"$", "").trim();
+            LocalDate fecha = LocalDate.parse(partes[1].replaceAll("^\"|\"$", "").trim(), DATE_FORMAT);
+            EventType tipo = EventType.valueOf(partes[2].replaceAll("^\"|\"$", "").trim());
+            String titulo = partes[3].replaceAll("^\"|\"$", "").trim();
+            String ubicacion = partes[4].replaceAll("^\"|\"$", "").trim();
+            Integer cupo = Integer.parseInt(partes[5].trim());
+            BigDecimal costo = new BigDecimal(partes[6].trim());
 
-            // *Eliminamos las comillas */
-            String valor = parte.replaceAll("^\"|\"$", "").trim();
-            if (CODIGO_EVENTO.matcher(valor).matches()) {
-                codigo = valor;
-            } else if (FECHA_EVENTO.matcher(valor).matches()) {
-                fechaStr = LocalDate.parse(valor, DATE_FORMAT);
-            } else if (isEventType(valor)) {
-                tipoStr = EventType.valueOf(valor);
-            } else if (TITULO_EVENTO.matcher(valor).matches()) {
-                titulo = valor;
-            } else if (UBICACION_EVENTO.matcher(valor).matches()) {
-                ubicacion = valor;
-            } else if (CUPO_MAX_PARTICIPANTES.matcher(valor).matches()) {
-                cupoStr = Integer.parseInt(valor);
-            } else if (COSTO_EVENTO.matcher(valor).matches()) {
-                costoStr = new BigDecimal(valor);
-            }
+            if (!CODIGO_EVENTO.matcher(codigo).matches())
+                return null;
+            if (!FECHA_EVENTO.matcher(partes[1].replaceAll("^\"|\"$", "").trim()).matches())
+                return null;
+            if (!TITULO_EVENTO.matcher(titulo).matches())
+                return null;
+            if (!UBICACION_EVENTO.matcher(ubicacion).matches())
+                return null;
+            if (!CUPO_MAX_PARTICIPANTES.matcher(partes[5].trim()).matches())
+                return null;
+            if (!COSTO_EVENTO.matcher(partes[6].trim()).matches())
+                return null;
+
+            return new EventModel(codigo, fecha, tipo, titulo, ubicacion, cupo, costo);
+
+        } catch (Exception e) {
+
+            return null;
         }
-        // *Verificamos que todos los datos hayan sido reconocidos */
-
-        if (codigo != null && fechaStr != null && tipoStr != null && titulo != null && ubicacion != null
-                && cupoStr != null && costoStr != null) {
-            return new EventModel(codigo, fechaStr, tipoStr, titulo, ubicacion, cupoStr, costoStr);
-        }
-        return null;
     }
 
     /**
@@ -122,5 +112,6 @@ public class RExpresionEvento {
     private String[] splitArgs(String input) {
         // *Divide los argumentos por comas*/
         return input.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+
     }
 }

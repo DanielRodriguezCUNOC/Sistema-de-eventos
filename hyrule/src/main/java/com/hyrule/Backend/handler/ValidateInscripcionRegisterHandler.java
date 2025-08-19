@@ -1,10 +1,10 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionValidarInscripcion;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.validate_registration.ValidateRegistrationModel;
@@ -71,7 +71,7 @@ public class ValidateInscripcionRegisterHandler implements RegisterHandler {
      * @throws Exception Si ocurre un error durante el procesamiento
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
+    public boolean process(String linea, LogFormatter logWriter) {
         try {
 
             // *Validamos usando expresion regular */
@@ -80,47 +80,43 @@ public class ValidateInscripcionRegisterHandler implements RegisterHandler {
             ValidateRegistrationModel inscripcion = parser.parseValidateRegistration(linea.trim());
 
             if (inscripcion == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
-                logWriter.newLine();
+                logWriter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
 
             if (!validator.existsRegistration(inscripcion.getCorreo(), inscripcion.getCodigoEvento())) {
-                logWriter.write("El participante " + inscripcion.getCorreo() + " no está inscrito en el evento: "
+                logWriter.error("El participante " + inscripcion.getCorreo() + " no está inscrito en el evento: "
                         + inscripcion.getCodigoEvento());
-                logWriter.newLine();
                 return false;
             }
 
             if (!validator.existsPayment(inscripcion.getCorreo(), inscripcion.getCodigoEvento())) {
-                logWriter.write(
+                logWriter.error(
                         "El participante " + inscripcion.getCorreo() + " no ha realizado el pago para el evento: "
                                 + inscripcion.getCodigoEvento());
-                logWriter.newLine();
                 return false;
 
             }
 
             if (validator.existsValidateRegistration(inscripcion)) {
-                logWriter.write("La validación de inscripción ya existe: " + inscripcion.getCorreo() + " - "
+                logWriter.error("La validación de inscripción ya existe: " + inscripcion.getCorreo() + " - "
                         + inscripcion.getCodigoEvento());
-                logWriter.newLine();
                 return false;
 
             }
 
-            // *Agregamos la validacion a la estructura de validacion */
-            validator.addValidarInscripcion(inscripcion);
-            logWriter.write("Validación de inscripción registrada: " + inscripcion);
-            logWriter.newLine();
-
-            // * Insertamos la validación en la base de datos */
-            return control.insert(inscripcion, conn) != null;
+            if (control.insert(inscripcion, conn) != null) {
+                validator.addValidarInscripcion(inscripcion);
+                logWriter.info("Validación de inscripción registrada: " + inscripcion);
+                return true;
+            } else {
+                logWriter.error("Error al insertar la validación de inscripción en la base de datos.");
+                return false;
+            }
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
-                logWriter.newLine();
+                logWriter.error("Excepción procesando VALIDAR_INSCRIPCION: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;

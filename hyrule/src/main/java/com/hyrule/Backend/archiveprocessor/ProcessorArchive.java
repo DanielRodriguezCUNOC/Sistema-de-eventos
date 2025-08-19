@@ -40,6 +40,15 @@ public class ProcessorArchive {
 
     public ProcessorArchive() {
 
+        // * Inicializamos la conexión a la base de datos */
+        this.dbConnection = new DBConnection();
+        try {
+            this.conn = dbConnection.getConnection();
+            System.out.println("Conexión a la base de datos establecida desde ProcessorArchive.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // * Mapeo de tipos de eventos a sus respectivos manejadores */
 
         HANDLER.put("REGISTRO_EVENTO", new EventRegisterHandler(getConnection()));
@@ -57,14 +66,6 @@ public class ProcessorArchive {
         HANDLER.put("ASISTENCIA", new AttendanceRegisterHandler(getConnection()));
 
         HANDLER.put("PAGO", new PaymentRegisterHandler(getConnection()));
-
-        // * Inicializamos la conexión a la base de datos */
-        this.dbConnection = new DBConnection();
-        try {
-            this.conn = dbConnection.getConnection();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -87,7 +88,9 @@ public class ProcessorArchive {
         isRunning = true;
 
         executor.execute(() -> {
+
             LogFormatter logFormatter = null;
+
             try (BufferedReader br = new BufferedReader(new FileReader(filePath.toFile()));
                     BufferedWriter logWriter = new BufferedWriter(new FileWriter(fileLog.toFile(), true))) {
 
@@ -127,12 +130,15 @@ public class ProcessorArchive {
     }
 
     private void procesarArchivo(String linea, BufferedWriter logWriter) throws Exception {
+
         LogFormatter logFormatter = new LogFormatter(logWriter);
+
         String comando = extraerComando(linea);
+
         RegisterHandler handler = HANDLER.get(comando);
 
         if (handler != null) {
-            boolean estado = handler.process(linea, logWriter);
+            boolean estado = handler.process(linea, logFormatter);
             if (!estado) {
                 logFormatter.error("Error al procesar la línea: " + linea);
             } else {

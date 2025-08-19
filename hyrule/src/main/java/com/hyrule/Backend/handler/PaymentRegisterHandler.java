@@ -1,11 +1,11 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionPago;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.payment.PaymentModel;
@@ -40,7 +40,7 @@ public class PaymentRegisterHandler implements RegisterHandler {
      * @return true si el pago se procesó correctamente
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
+    public boolean process(String linea, LogFormatter logWriter) {
 
         try {
 
@@ -49,39 +49,35 @@ public class PaymentRegisterHandler implements RegisterHandler {
             PaymentModel pago = parser.parsePayment(linea.trim());
 
             if (pago == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
-                logWriter.newLine();
+                logWriter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
 
             if (!validator.existsEvent(pago.getCodigoEvento())) {
-                logWriter.write("El evento no existe: " + pago.getCodigoEvento());
-                logWriter.newLine();
+                logWriter.error("El evento no existe: " + pago.getCodigoEvento());
                 return false;
 
             }
 
             if (validator.existsPayment(pago.getCorreo(), pago.getCodigoEvento())) {
-                logWriter.write("El participante " + pago.getCorreo() + " ya realizó el pago para el evento: "
+                logWriter.error("El participante " + pago.getCorreo() + " ya realizó el pago para el evento: "
                         + pago.getCodigoEvento());
-                logWriter.newLine();
                 return false;
 
             }
 
-            // *Agregamos el pago a la estructura de validacion */
-            validator.addPago(pago);
-
-            logWriter.write("Pago registrado: " + pago);
-            logWriter.newLine();
-
-            // Insertamos el pago en la base de datos */
-            return control.insert(pago, conn) != null;
+            if (control.insert(pago, conn) != null) {
+                validator.addPago(pago);
+                logWriter.info("Pago registrado: " + pago);
+                return true;
+            } else {
+                logWriter.error("Error al insertar el pago en la base de datos.");
+                return false;
+            }
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando PAGO: " + e.getMessage());
-                logWriter.newLine();
+                logWriter.error("Excepción procesando PAGO: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;
