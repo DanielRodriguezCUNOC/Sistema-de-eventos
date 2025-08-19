@@ -37,7 +37,7 @@ public class RExpresionParticipantReport {
         try {
             String codigo = partes[0].replaceAll("^\"|\"$", "").trim();
             ParticipantType tipoParticipante = ParticipantType.valueOf(partes[1].replaceAll("^\"|\"$", "").trim());
-            String institucion = partes[3].replaceAll("^\"|\"$", "").trim();
+            String institucion = partes[2].replaceAll("^\"|\"$", "").trim();
 
             if (!CODIGO_EVENTO.matcher(codigo).matches()) {
                 return null;

@@ -37,28 +37,23 @@ public class RExpresionInscripcion {
         // Dividimos respetando comillas
         String[] partes = splitArgs(contenido);
 
-        // Debe haber exactamente 3 partes
         if (partes.length != 3) {
             return null;
         }
 
         try {
-            // Asignación posicional de cada campo
             String correo = partes[0].replaceAll("^\"|\"$", "").trim();
             String codigoEvento = partes[1].replaceAll("^\"|\"$", "").trim();
             RegistrationType tipoInscripcion = RegistrationType.valueOf(partes[2].replaceAll("^\"|\"$", "").trim());
 
-            // Validaciones básicas con regex
             if (!EMAIL.matcher(correo).matches())
                 return null;
             if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
                 return null;
 
-            // Creamos y devolvemos la inscripción
             return new RegistrationModel(correo, codigoEvento, tipoInscripcion);
 
         } catch (Exception e) {
-            // Cualquier error de parseo devuelve null
             return null;
         }
     }

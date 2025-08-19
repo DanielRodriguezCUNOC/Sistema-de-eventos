@@ -217,8 +217,7 @@ public class CertifiedRegisterForm extends JInternalFrame {
 
         CertifiedModel certified = new CertifiedModel(correo, codigoEvento);
 
-        CertifiedRegisterHandler validator = new CertifiedRegisterHandler(adminView.getConnection(),
-                selectedFile.toPath());
+        CertifiedRegisterHandler validator = new CertifiedRegisterHandler(adminView.getConnection());
 
         String validationMsg = validator.validateForm(certified);
         if (!"Ok".equals(validationMsg)) {

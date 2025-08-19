@@ -40,9 +40,8 @@ public class RExpresionAsistencia {
         }
 
         try {
-            // Asignación posicional de cada campo
-            String codigoEvento = partes[0].replaceAll("^\"|\"$", "").trim();
-            String correo = partes[1].replaceAll("^\"|\"$", "").trim();
+            String correo = partes[0].replaceAll("^\"|\"$", "").trim();
+            String codigoEvento = partes[1].replaceAll("^\"|\"$", "").trim();
 
             if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
                 return null;
@@ -52,7 +51,6 @@ public class RExpresionAsistencia {
             return new AttendanceModel(codigoEvento, correo);
 
         } catch (Exception e) {
-            // Cualquier error de parseo devuelve null
             return null;
         }
     }
