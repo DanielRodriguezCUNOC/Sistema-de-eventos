@@ -36,7 +36,6 @@ public class DBConnection {
      * Muestra información del esquema y catálogo una vez conectado.
      */
     public void connect() {
-        System.out.println("URL de conexión: " + URL);
 
         try {
             connection = DriverManager.getConnection(URL, USER, PASSWORD);

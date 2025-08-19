@@ -123,7 +123,7 @@ public class AdminModule extends JFrame {
     private void mostrarVistaInicio() {
         cerrarVentanas();
 
-        try (InputStream imgStream = getClass().getResourceAsStream("/com/hyrule/resources/images/fondo.png")) {
+        try (InputStream imgStream = getClass().getClassLoader().getResourceAsStream("images/fondo.png")) {
             if (imgStream != null) {
                 Image imagen = ImageIO.read(imgStream);
                 JPanel panelInicio = new JPanel() {
