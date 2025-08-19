@@ -30,7 +30,7 @@ public class UploadArchiveFrame extends JInternalFrame {
     private AdminModule adminView;
     private JSpinner spinnerDelay;
     private JTextField textFieldReportPath;
-    private Path reportPath;
+    private Path reportPath = Paths.get(System.getProperty("user.home"), "reportes");
 
     public UploadArchiveFrame(AdminModule adminView) {
         super("", true, true, true, true);
@@ -70,7 +70,7 @@ public class UploadArchiveFrame extends JInternalFrame {
         JLabel labelVelocidad = new JLabel("Velocidad de procesamiento (ms):");
         labelVelocidad.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        spinnerDelay = new JSpinner(new SpinnerNumberModel(1000, 1000, 10000, 100));
+        spinnerDelay = new JSpinner(new SpinnerNumberModel(500, 500, 10000, 100));
         spinnerDelay.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         panelVelocidad.add(labelVelocidad);
