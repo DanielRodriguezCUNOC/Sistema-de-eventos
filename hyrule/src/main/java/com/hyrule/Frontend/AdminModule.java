@@ -20,6 +20,9 @@ import com.hyrule.Frontend.payment.PaymentRegisterForm;
 import com.hyrule.Frontend.registration.InscripcionRegisterForm;
 import com.hyrule.Frontend.validate_registration.ValidateRegistrationForm;
 
+/**
+ * Módulo principal de administración del sistema de gestión de eventos
+ */
 public class AdminModule extends JFrame {
 
     private JDesktopPane desktopPane;

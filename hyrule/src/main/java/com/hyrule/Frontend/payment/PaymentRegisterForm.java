@@ -14,6 +14,9 @@ import com.hyrule.Backend.model.payment.PaymentType;
 import com.hyrule.Backend.handler.PaymentRegisterHandler;
 import com.hyrule.Frontend.AdminModule;
 
+/**
+ * Formulario para registro de pagos de eventos
+ */
 public class PaymentRegisterForm extends JInternalFrame {
 
     private JTextField txtCorreoParticipante;

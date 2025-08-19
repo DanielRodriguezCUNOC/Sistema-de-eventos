@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.payment;
 
+/**
+ * Tipos de pago disponibles en el sistema
+ */
 public enum PaymentType {
     EFECTIVO,
     TRANSFERENCIA,

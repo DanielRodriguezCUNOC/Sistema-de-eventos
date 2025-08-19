@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Formateador de logs para escribir mensajes con timestamp
+ */
 public class LogFormatter {
     private final BufferedWriter writer;
     private final DateTimeFormatter timestampFormat;

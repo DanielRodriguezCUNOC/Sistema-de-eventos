@@ -19,6 +19,9 @@ import com.hyrule.Backend.model.participant.ParticipantModel;
 import com.hyrule.Backend.model.reports.ParticipantModelReport;
 import com.hyrule.Backend.model.validate_registration.ValidateRegistrationModel;
 
+/**
+ * Creador de reportes de participantes en formato HTML
+ */
 public class ParticipantReportCreator {
 
     ValidationArchive validator = ValidationArchive.getInstance();

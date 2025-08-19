@@ -1,5 +1,8 @@
 package com.hyrule.Backend.model.certified;
 
+/**
+ * Modelo de datos para certificados de participación
+ */
 public class CertifiedModel {
 
     private String codigoEvento;

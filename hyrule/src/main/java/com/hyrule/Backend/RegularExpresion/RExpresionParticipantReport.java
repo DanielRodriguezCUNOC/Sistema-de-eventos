@@ -4,6 +4,9 @@ import java.util.regex.Pattern;
 
 import com.hyrule.Backend.model.participant.ParticipantType;
 
+/**
+ * Expresiones regulares para validación de datos en reportes de participantes
+ */
 public class RExpresionParticipantReport {
 
     /** Expresión regular para validar la institución */

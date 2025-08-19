@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Formulario para registro de eventos
+ */
 public class EventRegisterForm extends JInternalFrame {
     private JTextField txtCodigoEvento;
     private JTextField txtFechaEvento;

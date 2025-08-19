@@ -3,6 +3,9 @@ package com.hyrule.Backend.model.activity;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Modelo de datos para actividades del sistema de eventos
+ */
 public class ActivityModel {
 
     private String codigoActividad;

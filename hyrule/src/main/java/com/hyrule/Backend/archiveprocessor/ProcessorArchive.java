@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Handler;
 
 import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.connection.DBConnection;
@@ -23,10 +24,14 @@ import com.hyrule.Backend.handler.CertifiedRegisterHandler;
 import com.hyrule.Backend.handler.EventRegisterHandler;
 import com.hyrule.Backend.handler.InscripcionRegisterHandler;
 import com.hyrule.Backend.handler.ParticipantRegisterHandler;
+import com.hyrule.Backend.handler.ParticipantReportHandler;
 import com.hyrule.Backend.handler.PaymentRegisterHandler;
 import com.hyrule.Backend.handler.ValidateInscripcionRegisterHandler;
 import com.hyrule.interfaces.RegisterHandler;
 
+/**
+ * Procesador de archivos para registro masivo de datos del sistema
+ */
 public class ProcessorArchive {
 
     private final Map<String, RegisterHandler> HANDLER = new HashMap<>();
@@ -44,7 +49,6 @@ public class ProcessorArchive {
         this.dbConnection = new DBConnection();
         try {
             this.conn = dbConnection.getConnection();
-            System.out.println("Conexión a la base de datos establecida desde ProcessorArchive.");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,6 +71,8 @@ public class ProcessorArchive {
 
         HANDLER.put("PAGO", new PaymentRegisterHandler(getConnection()));
 
+        HANDLER.put("REPORTE_PARTICIPANTES", new ParticipantReportHandler(conn));
+
     }
 
     public void processWithThread(Path filePath, Path reportDirectoryPath, int delay, Runnable onComplete) {
@@ -79,6 +85,10 @@ public class ProcessorArchive {
 
         CertifiedRegisterHandler certifiedHandler = (CertifiedRegisterHandler) HANDLER.get("CERTIFICADO");
         certifiedHandler.setDirectoryPath(reportDirectoryPath);
+
+        ParticipantReportHandler participantReportHandler = (ParticipantReportHandler) HANDLER
+                .get("REPORTE_PARTICIPANTES");
+        participantReportHandler.setDirectoryPath(reportDirectoryPath);
 
         try {
             Files.createDirectories(fileLog.getParent());

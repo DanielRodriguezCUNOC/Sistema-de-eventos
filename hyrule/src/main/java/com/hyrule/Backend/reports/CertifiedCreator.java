@@ -16,6 +16,9 @@ import com.hyrule.Backend.model.event.EventModel;
 import com.hyrule.Backend.model.participant.ParticipantModel;
 import com.hyrule.Backend.persistence.certified.ControlCertified;
 
+/**
+ * Creador de certificados para participantes en eventos
+ */
 public class CertifiedCreator {
 
     ValidationArchive validator = ValidationArchive.getInstance();

@@ -7,6 +7,9 @@ import java.awt.Insets;
 
 import javax.swing.border.Border;
 
+/**
+ * Borde redondeado personalizado para componentes Swing
+ */
 // Clase auxiliar para bordes redondeados (si no la tienes)
 public class RoundBorder implements Border {
     private int radius;
