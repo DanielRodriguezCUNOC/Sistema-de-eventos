@@ -1,10 +1,10 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionParticipante;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.participant.ParticipantModel;
@@ -90,39 +90,36 @@ public class ParticipantRegisterHandler implements RegisterHandler {
      *          definido en RExpresionParticipante
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
+    public boolean process(String linea, LogFormatter logWriter) {
         try {
 
             // *Validamos con la expresion regular */
             RExpresionParticipante parser = new RExpresionParticipante();
             ParticipantModel participante = parser.parseParticipant(linea.trim());
             if (participante == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
-                logWriter.newLine();
+                logWriter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
 
             // *Validamos si el participante ya existe */
             if (validator.existsParticipant(participante.getCorreoParticipante())) {
-                logWriter.write("El participante ya existe: " + participante.getCorreoParticipante());
-                logWriter.newLine();
+                logWriter.error("El participante ya existe: " + participante.getCorreoParticipante());
                 return false;
 
             }
 
-            // *Agregamos los datos al HashSet */
-            validator.addParticipante(participante);
-
-            logWriter.write("Participante registrado: " + participante);
-            logWriter.newLine();
-
-            // * Insertamos el participante en la base de datos */
-            return control.insert(participante, conn) != null;
+            if (control.insert(participante, conn) != null) {
+                validator.addParticipante(participante);
+                logWriter.info("Participante registrado: " + participante);
+                return true;
+            } else {
+                logWriter.error("Error al insertar el participante en la base de datos.");
+                return false;
+            }
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando REGISTRO_PARTICIPANTE: " + e.getMessage());
-                logWriter.newLine();
+                logWriter.error("Excepción procesando REGISTRO_PARTICIPANTE: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;

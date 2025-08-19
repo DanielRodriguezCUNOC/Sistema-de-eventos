@@ -1,6 +1,6 @@
 package com.hyrule.interfaces;
 
-import java.io.BufferedWriter;
+import com.hyrule.Backend.LogFormatter;
 
 /**
  * Interfaz para el procesamiento de registros de datos.
@@ -15,6 +15,6 @@ public interface RegisterHandler {
      * @param logWriter el escritor para registrar errores
      * @return true si el procesamiento fue exitoso, false en caso contrario
      */
-    boolean process(String linea, BufferedWriter logWriter);
+    boolean process(String linea, LogFormatter logWriter);
 
 }

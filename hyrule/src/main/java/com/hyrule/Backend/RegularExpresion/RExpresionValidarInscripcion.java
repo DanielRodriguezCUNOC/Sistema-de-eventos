@@ -30,39 +30,27 @@ public class RExpresionValidarInscripcion {
             return null;
         }
 
-        // *Eliminamos el prefijo y sufijo */
         String contenido = linea.substring("VALIDAR_INSCRIPCION(".length(), linea.length() - 2).trim();
-
-        // * Dividimos la linea por comas */
         String[] partes = splitArgs(contenido);
 
-        // *Verificamos que tengan la cantidad de datos sea la correcta */
         if (partes.length != 2) {
             return null;
         }
 
-        String correo = null;
-        String codigoEvento = null;
+        try {
+            String correo = partes[0].replaceAll("^\"|\"$", "").trim();
+            String codigoEvento = partes[1].replaceAll("^\"|\"$", "").trim();
 
-        // *Ciclo para identificar el tipo de dato */
-        for (String parte : partes) {
+            if (!EMAIL.matcher(correo).matches())
+                return null;
+            if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
+                return null;
 
-            // *Eliminamos las comillas */
-            String valor = parte.replaceAll("^\"|\"$", "").trim();
-
-            if (CODIGO_EVENTO.matcher(valor).matches()) {
-                codigoEvento = valor;
-            } else if (EMAIL.matcher(valor).matches()) {
-                correo = valor;
-            }
-        }
-
-        // *Verificamos que todos los datos hayan sido reconocidos */
-        if (correo != null && codigoEvento != null) {
             return new ValidateRegistrationModel(correo, codigoEvento);
-        }
 
-        return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

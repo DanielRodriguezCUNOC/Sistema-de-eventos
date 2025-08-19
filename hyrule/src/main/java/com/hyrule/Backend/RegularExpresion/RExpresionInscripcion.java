@@ -26,60 +26,41 @@ public class RExpresionInscripcion {
      */
     public RegistrationModel parseRegistration(String linea) {
 
+        // Verificamos que tenga el formato básico
         if (!linea.startsWith("REGISTRO_INSCRIPCION") || !linea.endsWith(");")) {
             return null;
         }
 
-        // *Eliminamos el prefijo y sufijo */
+        // Eliminamos el prefijo y sufijo
         String contenido = linea.substring("REGISTRO_INSCRIPCION(".length(), linea.length() - 2).trim();
 
-        // * Dividimos la linea por comas */
+        // Dividimos respetando comillas
         String[] partes = splitArgs(contenido);
 
-        // *Verificamos que tengan la cantidad de datos sea la correcta */
-        if (partes.length != 2) {
+        // Debe haber exactamente 3 partes
+        if (partes.length != 3) {
             return null;
         }
 
-        String correo = null;
-        String codigoEvento = null;
-        RegistrationType tipoInscripcion = null;
+        try {
+            // Asignación posicional de cada campo
+            String correo = partes[0].replaceAll("^\"|\"$", "").trim();
+            String codigoEvento = partes[1].replaceAll("^\"|\"$", "").trim();
+            RegistrationType tipoInscripcion = RegistrationType.valueOf(partes[2].replaceAll("^\"|\"$", "").trim());
 
-        // *Ciclo para identificar el tipo de dato */
-        for (String parte : partes) {
-            String valor = parte.replaceAll("^\"|\"$", "").trim();
+            // Validaciones básicas con regex
+            if (!EMAIL.matcher(correo).matches())
+                return null;
+            if (!CODIGO_EVENTO.matcher(codigoEvento).matches())
+                return null;
 
-            if (EMAIL.matcher(valor).matches()) {
-                correo = valor;
-            } else if (CODIGO_EVENTO.matcher(valor).matches()) {
-                codigoEvento = valor;
-            } else if (isRegistrationType(codigoEvento)) {
-                tipoInscripcion = RegistrationType.valueOf(codigoEvento);
-
-            }
-        }
-
-        // *Verificamos que todos los datos hayan sido reconocidos */
-        if (correo != null && codigoEvento != null && tipoInscripcion != null) {
+            // Creamos y devolvemos la inscripción
             return new RegistrationModel(correo, codigoEvento, tipoInscripcion);
-        }
 
-        return null;
-    }
-
-    /**
-     * Verifica si una cadena corresponde a un tipo de inscripción válido.
-     * 
-     * @param registrationType la cadena a verificar
-     * @return true si es un tipo válido, false si no
-     */
-    private boolean isRegistrationType(String registrationType) {
-        for (RegistrationType type : RegistrationType.values()) {
-            if (type.name().equals(registrationType)) {
-                return true;
-            }
+        } catch (Exception e) {
+            // Cualquier error de parseo devuelve null
+            return null;
         }
-        return false;
     }
 
     /**

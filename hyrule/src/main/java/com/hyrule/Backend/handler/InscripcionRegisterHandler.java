@@ -1,9 +1,9 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.util.regex.Pattern;
 
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionInscripcion;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.inscripcion.RegistrationModel;
@@ -38,7 +38,7 @@ public class InscripcionRegisterHandler implements RegisterHandler {
      * @return true si la inscripción se procesó correctamente
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
+    public boolean process(String linea, LogFormatter logWriter) {
         try {
 
             // *Expresion regular para validar la linea */
@@ -46,30 +46,27 @@ public class InscripcionRegisterHandler implements RegisterHandler {
             RegistrationModel inscripcion = parser.parseRegistration(linea.trim());
 
             if (inscripcion == null) {
-                logWriter.write("Línea inválida o incompleta: " + linea);
-                logWriter.newLine();
+                logWriter.error("Línea inválida o incompleta: " + linea);
                 return false;
             }
             if (validator.existsRegistration(inscripcion.getCodigoEvento(), inscripcion.getCorreoParticipante())) {
-                logWriter.write("La inscripción ya existe: " + inscripcion.getCodigoEvento() + " - "
+                logWriter.error("La inscripción ya existe: " + inscripcion.getCodigoEvento() + " - "
                         + inscripcion.getCorreoParticipante());
-                logWriter.newLine();
                 return false;
             }
 
-            // *Agregamos la inscripción a la estructura de validación */
-            validator.addInscripcion(inscripcion);
-
-            logWriter.write("Inscripción registrada: " + inscripcion);
-            logWriter.newLine();
-
-            // *Insertamos la inscripción en la base de datos */
-            return control.insert(inscripcion, conn) != null;
+            if (control.insert(inscripcion, conn) != null) {
+                validator.addInscripcion(inscripcion);
+                logWriter.info("Inscripción registrada: " + inscripcion);
+                return true;
+            } else {
+                logWriter.error("Error al insertar la inscripción en la base de datos.");
+                return false;
+            }
 
         } catch (Exception e) {
             try {
-                logWriter.write("Excepción procesando INSCRIPCION: " + e.getMessage());
-                logWriter.newLine();
+                logWriter.error("Excepción procesando INSCRIPCION: " + e.getMessage());
             } catch (Exception ignore) {
             }
             return false;

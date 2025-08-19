@@ -1,10 +1,10 @@
 package com.hyrule.Backend.handler;
 
-import java.io.BufferedWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import com.hyrule.Backend.LogFormatter;
 import com.hyrule.Backend.RegularExpresion.RExpresionEvento;
 import com.hyrule.Backend.Validation.ValidationArchive;
 import com.hyrule.Backend.model.event.EventModel;
@@ -44,57 +44,45 @@ public class EventRegisterHandler implements RegisterHandler {
      * @return true si el evento se procesó correctamente
      */
     @Override
-    public boolean process(String linea, BufferedWriter logWriter) {
-        DateTimeFormatter logTimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    public boolean process(String linea, LogFormatter logWriter) {
         try {
 
-            // *Validamos la linea con la expresion regular */
             RExpresionEvento parser = new RExpresionEvento();
             EventModel event = parser.parseEvent(linea.trim());
 
             if (event == null) {
-                logWriter.write(String.format("[%s] [ERROR] Linea inválida: %s",
-                        LocalDateTime.now().format(logTimeFormat), linea));
-                logWriter.newLine();
+                logWriter.error(String.format("Linea inválida: %s", linea));
                 return false;
             }
             if (validator.existsEvent(event.getCodigoEvento())) {
-                logWriter.write(String.format("[%s] [ERROR] El evento ya existe: %s",
-                        LocalDateTime.now().format(logTimeFormat), event.getCodigoEvento()));
-                logWriter.newLine();
+                logWriter.error(String.format("El evento ya existe: %s", event.getCodigoEvento()));
                 return false;
 
             }
             if (validator.eventHaveSameTitleAndDate(event.getTituloEvento(), event.getFechaEvento())) {
-                logWriter.write(String.format("[%s] [ERROR] Ya existe un evento con el mismo título y fecha: %s - %s",
-                        LocalDateTime.now().format(logTimeFormat), event.getTituloEvento(),
+                logWriter.error(String.format("Ya existe un evento con el mismo título y fecha: %s - %s",
+                        event.getTituloEvento(),
                         event.getFechaEvento().format(DATE_FORMAT)));
-                logWriter.newLine();
                 return false;
             }
 
             if (control.insert(event, conn) != null) {
-                logWriter.write(String.format("[%s] [INFO] - Evento registrado: %s",
-                        LocalDateTime.now().format(logTimeFormat),
+                logWriter.info(String.format("Evento registrado: %s",
                         event.toString()));
-                logWriter.newLine();
 
                 // * Añadimos el evento al validador para futuras validaciones */
                 validator.addEvento(event);
                 return true;
             } else {
-                logWriter.write(String.format("[%s] [ERROR] No se pudo insertar el evento: %s",
-                        LocalDateTime.now().format(logTimeFormat), event.toString()));
-                logWriter.newLine();
+                logWriter.error(String.format("No se pudo insertar el evento: %s",
+                        event.toString()));
                 return false;
             }
 
         } catch (Exception e) {
             try {
-                logWriter.write(String.format("[%s] [ERROR] - Excepción no controlada: %s",
-                        LocalDateTime.now().format(logTimeFormat),
+                logWriter.error(String.format("Excepción no controlada: %s",
                         e.getMessage()));
-                logWriter.newLine();
             } catch (Exception ignore) {
             }
             return false;
