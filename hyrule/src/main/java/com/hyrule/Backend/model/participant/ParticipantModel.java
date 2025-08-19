@@ -24,11 +24,11 @@ public class ParticipantModel {
     }
 
     // * Getters y Setters */
-    public String getCorreo_participante() {
+    public String getCorreoParticipante() {
         return correo_participante;
     }
 
-    public String getNombre_completo() {
+    public String getNombreCompleto() {
         return nombre_completo;
     }
 
@@ -40,11 +40,11 @@ public class ParticipantModel {
         return institucion;
     }
 
-    public void setCorreo_participante(String correo_participante) {
+    public void setCorreoParticipante(String correo_participante) {
         this.correo_participante = correo_participante;
     }
 
-    public void setNombre_completo(String nombre_completo) {
+    public void setNombreCompleto(String nombre_completo) {
         this.nombre_completo = nombre_completo;
     }
 

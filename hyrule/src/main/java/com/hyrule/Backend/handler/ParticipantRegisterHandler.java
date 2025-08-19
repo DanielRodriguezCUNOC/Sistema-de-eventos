@@ -103,8 +103,8 @@ public class ParticipantRegisterHandler implements RegisterHandler {
             }
 
             // *Validamos si el participante ya existe */
-            if (validator.existsParticipant(participante.getCorreo_participante())) {
-                logWriter.write("El participante ya existe: " + participante.getCorreo_participante());
+            if (validator.existsParticipant(participante.getCorreoParticipante())) {
+                logWriter.write("El participante ya existe: " + participante.getCorreoParticipante());
                 logWriter.newLine();
                 return false;
 
@@ -221,12 +221,12 @@ public class ParticipantRegisterHandler implements RegisterHandler {
     private boolean validateDataIntegrity(ParticipantModel participante) {
 
         boolean isValidEmail = Pattern.matches(
-                "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", participante.getCorreo_participante())
-                && participante.getCorreo_participante() != null && !participante.getCorreo_participante().isBlank();
+                "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", participante.getCorreoParticipante())
+                && participante.getCorreoParticipante() != null && !participante.getCorreoParticipante().isBlank();
 
         boolean isValidName = Pattern.matches(
-                "^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\\-\\s]{1,45}$", participante.getNombre_completo())
-                && participante.getNombre_completo() != null && !participante.getNombre_completo().isBlank();
+                "^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ\\-\\s]{1,45}$", participante.getNombreCompleto())
+                && participante.getNombreCompleto() != null && !participante.getNombreCompleto().isBlank();
 
         boolean isValidInstitution = Pattern.matches(
                 "^[a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ.,:;()\\-\\s]{1,150}$", participante.getInstitucion())

@@ -31,7 +31,6 @@ public class UploadArchiveFrame extends JInternalFrame {
     private JSpinner spinnerDelay;
     private JTextField textFieldReportPath;
     private Path reportPath;
-    private Path filePath;
 
     public UploadArchiveFrame(AdminModule adminView) {
         super("", true, true, true, true);
@@ -168,8 +167,6 @@ public class UploadArchiveFrame extends JInternalFrame {
         int userSelection = fileChooser.showOpenDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            filePath = selectedFile.toPath();
-            System.out.println("Archivo seleccionado: " + selectedFile.getAbsolutePath());
 
             // Obtener valores de la configuración
             int delay = (Integer) spinnerDelay.getValue();
@@ -183,23 +180,6 @@ public class UploadArchiveFrame extends JInternalFrame {
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
-    }
-
-    // *Metodo para pedir al usuario que suba un archivo */
-    public void comenzarProcesamiento() {
-
-        // Obtener valores de la configuración
-        int delay = (Integer) spinnerDelay.getValue();
-
-        if (filePath != null && filePath.toFile().exists()) {
-            adminView.mostrarProcesamentArchiveModule(filePath,
-                    reportPath,
-                    delay);
-        } else {
-            JOptionPane.showMessageDialog(this, "El archivo seleccionado no existe.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
-
     }
 
     // *Modificar la ventana */

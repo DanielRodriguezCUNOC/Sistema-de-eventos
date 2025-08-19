@@ -247,7 +247,7 @@ public class ValidationArchive {
     public boolean existsParticipant(String participantEmail) {
         try {
             for (ParticipantModel participant : PARTICIPANTE) {
-                return participant.getCorreo_participante().equals(participantEmail);
+                return participant.getCorreoParticipante().equals(participantEmail);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Error al verificar la existencia del participante: " + e.getMessage());
@@ -469,4 +469,21 @@ public class ValidationArchive {
         }
         return false;
     }
+
+    public Set<EventModel> getEventos() {
+        return EVENTOS;
+    }
+
+    public Set<ActivityModel> getActividades() {
+        return ACTIVIDADES;
+    }
+
+    public Set<ParticipantModel> getParticipantes() {
+        return PARTICIPANTE;
+    }
+
+    public Set<AttendanceModel> getAsistencias() {
+        return ASISTENCIA;
+    }
+
 }

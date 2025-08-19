@@ -185,4 +185,40 @@ public class ControlCertified extends Control<CertifiedModel> {
         return false;
     }
 
+    // *Obtenemos los datos para el certificado */
+
+    public String[] getDataForCertified(String codigoEvento, String correoParticipante, Connection conn) {
+
+        String query = "SELECT p.nombre_completo, p.tipo_participante, " +
+                "e.titulo_evento, e.fecha_evento " +
+                "FROM participante p " +
+                "JOIN asistencia a ON p.correo_participante = a.correo_participante " +
+                "JOIN actividad ac ON a.codigo_actividad = ac.codigo_actividad " +
+                "JOIN evento e ON ac.codigo_evento = e.codigo_evento " +
+                "WHERE e.codigo_evento = ? AND p.correo_participante = ? " +
+                "LIMIT 1";
+
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, codigoEvento);
+            stmt.setString(2, correoParticipante);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String nombreCompleto = rs.getString("nombre_completo");
+                    String tipoParticipante = rs.getString("tipo_participante");
+                    String tituloEvento = rs.getString("titulo_evento");
+                    String fechaEvento = rs.getDate("fecha_evento").toString();
+
+                    return new String[] { nombreCompleto, tipoParticipante, tituloEvento, fechaEvento };
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
