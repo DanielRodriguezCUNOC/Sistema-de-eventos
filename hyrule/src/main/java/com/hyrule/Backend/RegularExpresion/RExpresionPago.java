@@ -30,12 +30,12 @@ public class RExpresionPago {
     public PaymentModel parsePayment(String linea) {
 
         // Verificamos que tenga el formato básico
-        if (!linea.startsWith("REGISTRO_PAGO") || !linea.endsWith(");")) {
+        if (!linea.startsWith("PAGO") || !linea.endsWith(");")) {
             return null;
         }
 
         // Eliminamos el prefijo y sufijo
-        String contenido = linea.substring("REGISTRO_PAGO(".length(), linea.length() - 2).trim();
+        String contenido = linea.substring("PAGO(".length(), linea.length() - 2).trim();
 
         // Dividimos respetando comillas
         String[] partes = splitArgs(contenido);
